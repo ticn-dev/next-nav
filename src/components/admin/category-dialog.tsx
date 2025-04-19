@@ -101,7 +101,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{category ? '编辑分类' : '添加分类'}</DialogTitle>
           <DialogDescription>{category ? '修改分类信息' : '添加新的分类到导航页'}</DialogDescription>

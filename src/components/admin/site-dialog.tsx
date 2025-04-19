@@ -191,7 +191,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{site ? '编辑站点' : '添加站点'}</DialogTitle>
           <DialogDescription>{site ? '修改站点信息' : '添加新的站点到导航页'}</DialogDescription>
