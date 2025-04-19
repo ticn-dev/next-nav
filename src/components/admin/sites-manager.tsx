@@ -135,13 +135,13 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
 
   const handleSaveSite = (savedSite: Site) => {
     // 这里是来自服务端的site结构,带有category,而且不包含imageLoadError
-    const site = savedSite as LoadableSiteWithCategory
+    const newSite = savedSite as LoadableSiteWithCategory
     if (editingSite) {
       // Update existing site
-      setSites(sites.map((site) => (site.id === site.id ? site : site)))
+      setSites(sites.map((site) => (site.id === newSite.id ? newSite : site)))
     } else {
       // Add new site
-      setSites([...sites, site])
+      setSites([...sites, newSite])
     }
     setDialogOpen(false)
   }

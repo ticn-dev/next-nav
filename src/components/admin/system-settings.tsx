@@ -89,10 +89,10 @@ export function SystemSettings({ initialSettings }: SystemSettingsProps) {
           </Card>
         </TabsContent>
         <TabsContent value="metadata">
-          <MetadataEditor initialMetadata={initialSettings.metadata}/>
+          <MetadataEditor initialMetadata={initialSettings.metadata} />
         </TabsContent>
         <TabsContent value="favicon">
-          <FaviconUploader initialFavicon="/api/icon/this"/>
+          <FaviconUploader initialFavicon="/api/icon/this" />
         </TabsContent>
       </Tabs>
     </div>
