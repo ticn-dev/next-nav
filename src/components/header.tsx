@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { Menu, Settings } from "lucide-react"
-import { SiGithub as Github } from "@icons-pack/react-simple-icons"
-import { ModeToggle } from "./mode-toggle"
-import { useState } from "react"
-import { SettingsDialog } from "./settings-dialog"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Button } from '@/components/ui/button'
+import { Menu, Settings } from 'lucide-react'
+import { SiGithub as Github } from '@icons-pack/react-simple-icons'
+import { ModeToggle } from './mode-toggle'
+import { useState } from 'react'
+import { SettingsDialog } from './settings-dialog'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -18,7 +18,7 @@ export default function Header() {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
     // Dispatch custom event for mobile menu component to listen to
-    const event = new CustomEvent("toggleMobileMenu", {
+    const event = new CustomEvent('toggleMobileMenu', {
       detail: { isOpen: !isMobileMenuOpen },
     })
     document.dispatchEvent(event)
@@ -26,11 +26,11 @@ export default function Header() {
 
   const handleAdminNavigation = () => {
     setIsSettingsOpen(false)
-    router.push("/admin/system")
+    router.push('/admin/system')
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className="bg-background sticky top-0 z-40 w-full border-b">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMobileMenu}>

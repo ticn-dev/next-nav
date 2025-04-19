@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { useEffect, useState } from "react"
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { useEffect, useState } from 'react'
 
 interface Category {
   id: number
@@ -24,10 +24,10 @@ export function MobileMenu({ categories }: MobileMenuProps) {
       setOpen(customEvent.detail.isOpen)
     }
 
-    document.addEventListener("toggleMobileMenu", handleToggle)
+    document.addEventListener('toggleMobileMenu', handleToggle)
 
     return () => {
-      document.removeEventListener("toggleMobileMenu", handleToggle)
+      document.removeEventListener('toggleMobileMenu', handleToggle)
     }
   }, [])
 
@@ -36,7 +36,7 @@ export function MobileMenu({ categories }: MobileMenuProps) {
     if (element) {
       setOpen(false)
       setTimeout(() => {
-        element.scrollIntoView({ behavior: "smooth" })
+        element.scrollIntoView({ behavior: 'smooth' })
       }, 300)
     }
   }
@@ -49,12 +49,7 @@ export function MobileMenu({ categories }: MobileMenuProps) {
         </SheetHeader>
         <div className="mt-6 space-y-2">
           {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => scrollToCategory(category.id)}
-            >
+            <Button key={category.id} variant="ghost" className="w-full justify-start" onClick={() => scrollToCategory(category.id)}>
               {category.name}
             </Button>
           ))}

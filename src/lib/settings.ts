@@ -1,9 +1,9 @@
-import {prisma} from "./prisma"
+import { prisma } from './prisma'
 
 export type SystemSettings = {
-  title: string,
-  favicon: string,
-  copyright: string,
+  title: string
+  favicon: string
+  copyright: string
 }
 
 type SystemSettingsKey = keyof SystemSettings
@@ -22,20 +22,20 @@ export async function getSystemSettings(...columns: string[]): Promise<Partial<S
 
   const settings: Record<string, string> = {}
   settingsRecords.forEach((record) => {
-    settings[record.key] = record.value || ""
+    settings[record.key] = record.value || ''
   })
 
   return {
-    title: settings.title || "",
-    favicon: settings.favicon || "",
-    copyright: settings.copyright || "",
+    title: settings.title || '',
+    favicon: settings.favicon || '',
+    copyright: settings.copyright || '',
   }
 }
 
 export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T]) {
   await prisma.systemSettings.upsert({
-    where: {key},
-    update: {value},
-    create: {key, value},
+    where: { key },
+    update: { value },
+    create: { key, value },
   })
 }

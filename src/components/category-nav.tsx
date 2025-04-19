@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import {cn} from "@/lib/utils"
-import {useEffect, useRef, useState} from "react"
-import {Button} from "./ui/button"
+import { cn } from '@/lib/utils'
+import { useEffect, useRef, useState } from 'react'
+import { Button } from './ui/button'
 
 interface Category {
   id: number
@@ -16,7 +16,7 @@ interface CategoryNavProps {
   categories: Category[]
 }
 
-export function CategoryNav({className, categories}: CategoryNavProps) {
+export function CategoryNav({ className, categories }: CategoryNavProps) {
   const [activeCategory, setActiveCategory] = useState<number | null>(categories.length > 0 ? categories[0].id : null)
   const navRef = useRef<HTMLDivElement>(null)
   const activeCategoryRef = useRef<HTMLButtonElement>(null)
@@ -28,16 +28,16 @@ export function CategoryNav({className, categories}: CategoryNavProps) {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const id = entry.target.id.replace("category-", "")
+            const id = entry.target.id.replace('category-', '')
             setActiveCategory(Number.parseInt(id))
           }
         })
       },
-      {threshold: 0.3, rootMargin: "-100px 0px -100px 0px"},
+      { threshold: 0.3, rootMargin: '-100px 0px -100px 0px' },
     )
 
     // Observe all category sections
-    document.querySelectorAll(".category-section").forEach((section) => {
+    document.querySelectorAll('.category-section').forEach((section) => {
       observer.observe(section)
     })
 
@@ -61,8 +61,8 @@ export function CategoryNav({className, categories}: CategoryNavProps) {
         if (isAbove || isBelow) {
           // Scroll the button into view with some padding
           activeButton.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
+            behavior: 'smooth',
+            block: 'nearest',
           })
         }
       }
@@ -72,16 +72,16 @@ export function CategoryNav({className, categories}: CategoryNavProps) {
   const scrollToCategory = (categoryId: number) => {
     const element = document.getElementById(`category-${categoryId}`)
     if (element) {
-      element.scrollIntoView({behavior: "smooth"})
+      element.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
   return (
-    <aside className={cn("w-64 shrink-0 border-r bg-background p-4", className)}>
-      <div className="sticky top-0 bg-background">
+    <aside className={cn('bg-background w-64 shrink-0 border-r p-4', className)}>
+      <div className="bg-background sticky top-0">
         <h2 className="text-lg font-semibold">分类导航</h2>
       </div>
-      <nav className="space-y-2 py-4 overflow-y-auto h-[calc(100vh-9rem)]" ref={navRef}>
+      <nav className="h-[calc(100vh-9rem)] space-y-2 overflow-y-auto py-4" ref={navRef}>
         {categories.map((category) => (
           <Button
             key={category.id}
@@ -93,7 +93,7 @@ export function CategoryNav({className, categories}: CategoryNavProps) {
                 }
               }
             }}
-            variant={activeCategory === category.id ? "secondary" : "ghost"}
+            variant={activeCategory === category.id ? 'secondary' : 'ghost'}
             className="w-full justify-start"
             onClick={() => scrollToCategory(category.id)}
           >

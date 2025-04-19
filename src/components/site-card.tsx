@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { useSettings } from "@/components/settings-provider"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Globe } from "lucide-react"
-import Image from "next/image"
-import { useState } from "react"
+import { useSettings } from '@/components/settings-provider'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Globe } from 'lucide-react'
+import Image from 'next/image'
+import { useState } from 'react'
 
 interface Site {
   id: number
@@ -25,7 +25,7 @@ export function SiteCard({ site }: SiteCardProps) {
   const { settings } = useSettings()
 
   const handleClick = () => {
-    window.open(site.url, settings.openInNewTab ? "_blank" : "_self")
+    window.open(site.url, settings.openInNewTab ? '_blank' : '_self')
   }
 
   // Use site ID for icon if available
@@ -35,15 +35,7 @@ export function SiteCard({ site }: SiteCardProps) {
     <Card className="overflow-hidden transition-shadow hover:shadow-md" onClick={handleClick} role="link" tabIndex={0}>
       <CardHeader className="flex flex-row items-center gap-3 p-4">
         {!imageError ? (
-          <Image
-            src={iconUrl || "/placeholder.svg"}
-            alt={site.title}
-            width={24}
-            height={24}
-            className="h-6 w-6 object-contain"
-            onError={() => setImageError(true)}
-            loading="lazy"
-          />
+          <Image src={iconUrl || '/placeholder.svg'} alt={site.title} width={24} height={24} className="h-6 w-6 object-contain" onError={() => setImageError(true)} loading="lazy" />
         ) : (
           <Globe className="h-6 w-6" />
         )}

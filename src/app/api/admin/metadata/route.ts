@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma"
-import { type NextRequest, NextResponse } from "next/server"
-import {revalidateTag} from "next/cache";
+import { prisma } from '@/lib/prisma'
+import { type NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
       return newMetadata
     })
 
-    revalidateTag("categories")
+    revalidateTag('categories')
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Error updating metadata:", error)
-    return NextResponse.json({ error: "Failed to update metadata" }, { status: 500 })
+    console.error('Error updating metadata:', error)
+    return NextResponse.json({ error: 'Failed to update metadata' }, { status: 500 })
   }
 }

@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { cn } from "@/lib/utils"
-import { Button } from "../ui/button"
-import { usePathname, useRouter } from "next/navigation"
-import { Database, Globe, Lock, Settings } from "lucide-react"
-import { useEffect, useState } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet"
+import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
+import { usePathname, useRouter } from 'next/navigation'
+import { Database, Globe, Lock, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet'
 
 interface AdminSidebarProps {
   className?: string
@@ -22,32 +22,32 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       setOpen(customEvent.detail.isOpen)
     }
 
-    document.addEventListener("toggleAdminMobileMenu", handleToggle)
+    document.addEventListener('toggleAdminMobileMenu', handleToggle)
 
     return () => {
-      document.removeEventListener("toggleAdminMobileMenu", handleToggle)
+      document.removeEventListener('toggleAdminMobileMenu', handleToggle)
     }
   }, [])
 
   const menuItems = [
     {
-      name: "系统设置",
-      path: "/admin/system",
+      name: '系统设置',
+      path: '/admin/system',
       icon: <Settings className="mr-2 h-4 w-4" />,
     },
     {
-      name: "站点设置",
-      path: "/admin/sites",
+      name: '站点设置',
+      path: '/admin/sites',
       icon: <Globe className="mr-2 h-4 w-4" />,
     },
     {
-      name: "分类设置",
-      path: "/admin/categories",
+      name: '分类设置',
+      path: '/admin/categories',
       icon: <Database className="mr-2 h-4 w-4" />,
     },
     {
-      name: "登录设置",
-      path: "/admin/login",
+      name: '登录设置',
+      path: '/admin/login',
       icon: <Lock className="mr-2 h-4 w-4" />,
     },
   ]
@@ -57,7 +57,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       {menuItems.map((item) => (
         <Button
           key={item.path}
-          variant={pathname === item.path ? "secondary" : "ghost"}
+          variant={pathname === item.path ? 'secondary' : 'ghost'}
           className="w-full justify-start"
           onClick={() => {
             router.push(item.path)
@@ -73,7 +73,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
 
   return (
     <>
-      <aside className={cn("w-64 shrink-0 border-r bg-background p-4", className)}>{sidebarContent}</aside>
+      <aside className={cn('bg-background w-64 shrink-0 border-r p-4', className)}>{sidebarContent}</aside>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-64 transition-transform duration-300">

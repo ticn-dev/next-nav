@@ -1,15 +1,15 @@
-import { LoginSettings } from "@/components/admin/login-settings"
-import { prisma } from "@/lib/prisma"
+import { LoginSettings } from '@/components/admin/login-settings'
+import { prisma } from '@/lib/prisma'
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic'
 
 async function getAdminUser() {
   const admin = await prisma.admin.findFirst()
-  return admin ? admin.username : ""
+  return admin ? admin.username : ''
 }
 
 export const metadata = {
-  title: "登录设置",
+  title: '登录设置',
 }
 
 export default async function LoginPage() {

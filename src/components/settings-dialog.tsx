@@ -1,18 +1,11 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { useSettings } from "./settings-provider"
-import Link from "next/link"
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { useSettings } from './settings-provider'
+import Link from 'next/link'
 
 interface SettingsDialogProps {
   open: boolean
@@ -32,11 +25,7 @@ export function SettingsDialog({ open, onOpenChange, onAdminClick }: SettingsDia
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="new-tab"
-              checked={settings.openInNewTab}
-              onCheckedChange={(checked) => updateSettings({ openInNewTab: checked as boolean })}
-            />
+            <Checkbox id="new-tab" checked={settings.openInNewTab} onCheckedChange={(checked) => updateSettings({ openInNewTab: checked as boolean })} />
             <Label htmlFor="new-tab">在新标签页中打开链接</Label>
           </div>
         </div>

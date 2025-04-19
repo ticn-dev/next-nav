@@ -1,14 +1,14 @@
-"use client"
+'use client'
 
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
-import {useState} from "react"
-import {MetadataEditor} from "./metadata-editor"
-import {FaviconUploader} from "./favicon-uploader"
-import {toast} from "@/components/ui/use-toast"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useState } from 'react'
+import { MetadataEditor } from './metadata-editor'
+import { FaviconUploader } from './favicon-uploader'
+import { toast } from '@/components/ui/use-toast'
 
 interface MetaData {
   id: number
@@ -28,7 +28,7 @@ interface SystemSettingsProps {
   onInitialSettingsChange?: (settings: Partial<SystemSettingsRecord>) => void
 }
 
-export function SystemSettings({initialSettings, onInitialSettingsChange}: SystemSettingsProps) {
+export function SystemSettings({ initialSettings, onInitialSettingsChange }: SystemSettingsProps) {
   const [title, setTitle] = useState(initialSettings.title)
   const [copyright, setCopyright] = useState(initialSettings.copyright)
   const [isSaving, setIsSaving] = useState(false)
@@ -36,35 +36,35 @@ export function SystemSettings({initialSettings, onInitialSettingsChange}: Syste
   const handleSaveSiteSettings = async () => {
     setIsSaving(true)
     try {
-      const response = await fetch("/api/admin/system", {
-        method: "POST",
+      const response = await fetch('/api/admin/system', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify([
-          {key: "title", value: title},
-          {key: "copyright", value: copyright},
+          { key: 'title', value: title },
+          { key: 'copyright', value: copyright },
         ]),
       })
 
       if (response.ok) {
         toast({
-          title: "保存成功",
-          description: "网站标题已更新",
+          title: '保存成功',
+          description: '网站标题已更新',
         })
-        onInitialSettingsChange?.({title})
+        onInitialSettingsChange?.({ title })
         const currentTitle = document.title
         const prefix = currentTitle.split('|', 2)[0].trim()
         document.title = `${prefix} | ${title || 'Next Nav'}`
       } else {
-        throw new Error("Failed to save title")
+        throw new Error('Failed to save title')
       }
     } catch (error) {
-      console.error("Error saving title:", error)
+      console.error('Error saving title:', error)
       toast({
-        title: "保存失败",
-        description: "请稍后重试",
-        variant: "destructive",
+        title: '保存失败',
+        description: '请稍后重试',
+        variant: 'destructive',
       })
     } finally {
       setIsSaving(false)
@@ -88,25 +88,25 @@ export function SystemSettings({initialSettings, onInitialSettingsChange}: Syste
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">站点名称</Label>
-                <span className="text-sm text-muted-foreground">直接展示在网页标签栏上的名称</span>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Next Nav"/>
+                <span className="text-muted-foreground text-sm">直接展示在网页标签栏上的名称</span>
+                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Next Nav" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="copyright">版权信息</Label>
-                <span className="text-sm text-muted-foreground">直接展示在网页底部的版权信息</span>
-                <Input id="copyright" value={copyright} onChange={(e) => setCopyright(e.target.value)} placeholder="Kairlec-NextNav"/>
+                <span className="text-muted-foreground text-sm">直接展示在网页底部的版权信息</span>
+                <Input id="copyright" value={copyright} onChange={(e) => setCopyright(e.target.value)} placeholder="Kairlec-NextNav" />
               </div>
               <Button onClick={handleSaveSiteSettings} disabled={isSaving}>
-                {isSaving ? "保存中..." : "保存"}
+                {isSaving ? '保存中...' : '保存'}
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="metadata">
-          <MetadataEditor initialMetadata={initialSettings.metadata} onUpdate={(metadata) => onInitialSettingsChange?.({metadata})}/>
+          <MetadataEditor initialMetadata={initialSettings.metadata} onUpdate={(metadata) => onInitialSettingsChange?.({ metadata })} />
         </TabsContent>
         <TabsContent value="favicon">
-          <FaviconUploader initialFavicon={initialSettings.favicon} onUpdate={(favicon) => onInitialSettingsChange?.({favicon})}/>
+          <FaviconUploader initialFavicon={initialSettings.favicon} onUpdate={(favicon) => onInitialSettingsChange?.({ favicon })} />
         </TabsContent>
       </Tabs>
     </div>

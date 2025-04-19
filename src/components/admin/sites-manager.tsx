@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "@/components/ui/use-toast"
-import { Edit, Plus, RefreshCw, Trash } from "lucide-react"
-import { useEffect, useState } from "react"
-import { SiteDialog } from "./site-dialog"
-import { DeleteConfirmDialog } from "./delete-confirm-dialog"
-import Image from "next/image"
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { toast } from '@/components/ui/use-toast'
+import { Edit, Plus, RefreshCw, Trash } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { SiteDialog } from './site-dialog'
+import { DeleteConfirmDialog } from './delete-confirm-dialog'
+import Image from 'next/image'
 
 interface Category {
   id: number
@@ -38,8 +38,8 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
   const [sites, setSites] = useState<Site[]>(initialSites)
   const [filteredSites, setFilteredSites] = useState<Site[]>(initialSites)
   const [isLoading, setIsLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(Math.ceil(initialSites.length / pageSize))
@@ -53,19 +53,14 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
     let result = [...sites]
 
     // Apply category filter
-    if (categoryFilter !== "all") {
+    if (categoryFilter !== 'all') {
       result = result.filter((site) => site.categoryId === Number.parseInt(categoryFilter))
     }
 
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
-      result = result.filter(
-        (site) =>
-          site.title.toLowerCase().includes(term) ||
-          site.url.toLowerCase().includes(term) ||
-          (site.description && site.description.toLowerCase().includes(term)),
-      )
+      result = result.filter((site) => site.title.toLowerCase().includes(term) || site.url.toLowerCase().includes(term) || (site.description && site.description.toLowerCase().includes(term)))
     }
 
     setTotalPages(Math.ceil(result.length / pageSize))
@@ -80,23 +75,23 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
   const refreshSites = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/admin/sites")
+      const response = await fetch('/api/admin/sites')
       if (response.ok) {
         const data = await response.json()
         setSites(data)
         toast({
-          title: "刷新成功",
-          description: "站点数据已更新",
+          title: '刷新成功',
+          description: '站点数据已更新',
         })
       } else {
-        throw new Error("Failed to refresh sites")
+        throw new Error('Failed to refresh sites')
       }
     } catch (error) {
-      console.error("Error refreshing sites:", error)
+      console.error('Error refreshing sites:', error)
       toast({
-        title: "刷新失败",
-        description: "请稍后重试",
-        variant: "destructive",
+        title: '刷新失败',
+        description: '请稍后重试',
+        variant: 'destructive',
       })
     } finally {
       setIsLoading(false)
@@ -123,24 +118,24 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
 
     try {
       const response = await fetch(`/api/admin/sites/${siteToDelete.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       })
 
       if (response.ok) {
         setSites(sites.filter((site) => site.id !== siteToDelete.id))
         toast({
-          title: "删除成功",
+          title: '删除成功',
           description: `站点 "${siteToDelete.title}" 已删除`,
         })
       } else {
-        throw new Error("Failed to delete site")
+        throw new Error('Failed to delete site')
       }
     } catch (error) {
-      console.error("Error deleting site:", error)
+      console.error('Error deleting site:', error)
       toast({
-        title: "删除失败",
-        description: "请稍后重试",
-        variant: "destructive",
+        title: '删除失败',
+        description: '请稍后重试',
+        variant: 'destructive',
       })
     } finally {
       setDeleteDialogOpen(false)
@@ -163,7 +158,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
     <div className="space-y-4">
       <Card className="p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-muted-foreground">当前共 {filteredSites.length} 条</div>
+          <div className="text-muted-foreground text-sm">当前共 {filteredSites.length} 条</div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:items-center">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full md:w-[180px]">
@@ -178,18 +173,13 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Input
-              placeholder="搜索站点..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-[200px]"
-            />
+            <Input placeholder="搜索站点..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full md:w-[200px]" />
             <div className="flex gap-2">
               <Button onClick={handleAddSite}>
                 <Plus className="h-4 w-4" />
               </Button>
               <Button variant="outline" onClick={refreshSites} disabled={isLoading}>
-                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
             </div>
           </div>
@@ -200,7 +190,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px] hidden md:table-cell">ID</TableHead>
+              <TableHead className="hidden w-[80px] md:table-cell">ID</TableHead>
               <TableHead>名称</TableHead>
               <TableHead className="hidden md:table-cell">分类</TableHead>
               <TableHead className="hidden lg:table-cell">网址</TableHead>
@@ -221,15 +211,9 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {site.imageUrl ? (
-                        <Image
-                          src={site.imageUrl || "/placeholder.svg"}
-                          alt={site.title}
-                          width={20}
-                          height={20}
-                          className="h-5 w-5 rounded-sm object-contain"
-                        />
+                        <Image src={site.imageUrl || '/placeholder.svg'} alt={site.title} width={20} height={20} className="h-5 w-5 rounded-sm object-contain" />
                       ) : (
-                        <div className="h-5 w-5 rounded-sm bg-muted" />
+                        <div className="bg-muted h-5 w-5 rounded-sm" />
                       )}
                       <span className="font-medium">{site.title}</span>
                     </div>
@@ -257,7 +241,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-sm text-muted-foreground">每页显示</p>
+          <p className="text-muted-foreground text-sm">每页显示</p>
           <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number.parseInt(value))}>
             <SelectTrigger className="w-[70px]">
               <SelectValue placeholder={pageSize.toString()} />
@@ -269,39 +253,23 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
               <SelectItem value="100">100</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">条</p>
+          <p className="text-muted-foreground text-sm">条</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
             上一页
           </Button>
           <p className="text-sm">
             {currentPage} / {totalPages || 1}
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages || totalPages === 0}>
             下一页
           </Button>
         </div>
       </div>
 
-      <SiteDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        site={editingSite}
-        categories={categories}
-        onSave={handleSaveSite}
-      />
+      <SiteDialog open={dialogOpen} onOpenChange={setDialogOpen} site={editingSite} categories={categories} onSave={handleSaveSite} />
 
       <DeleteConfirmDialog
         open={deleteDialogOpen}

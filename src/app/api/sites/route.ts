@@ -1,5 +1,5 @@
-import {prisma} from "@/lib/prisma"
-import {NextResponse} from "next/server"
+import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -7,12 +7,12 @@ export async function GET() {
       include: {
         category: true,
       },
-      orderBy: [{order: "asc"}, {id: "asc"}],
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
     })
 
     return NextResponse.json(sites)
   } catch (error) {
-    console.error("Error fetching sites:", error)
-    return NextResponse.json({error: "Failed to fetch sites"}, {status: 500})
+    console.error('Error fetching sites:', error)
+    return NextResponse.json({ error: 'Failed to fetch sites' }, { status: 500 })
   }
 }

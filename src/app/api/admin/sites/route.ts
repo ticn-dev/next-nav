@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma"
-import { fetchIcon } from "@/lib/favicon"
-import { NextResponse } from "next/server"
-import {revalidateTag} from "next/cache";
+import { prisma } from '@/lib/prisma'
+import { fetchIcon } from '@/lib/favicon'
+import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 
 export async function GET() {
   try {
@@ -9,13 +9,13 @@ export async function GET() {
       include: {
         category: true,
       },
-      orderBy: [{ order: "asc" }, { id: "asc" }],
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
     })
 
     return NextResponse.json(sites)
   } catch (error) {
-    console.error("Error fetching sites:", error)
-    return NextResponse.json({ error: "Failed to fetch sites" }, { status: 500 })
+    console.error('Error fetching sites:', error)
+    return NextResponse.json({ error: 'Failed to fetch sites' }, { status: 500 })
   }
 }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const { title, url, imageUrl, description, categoryId, order } = await request.json()
 
     if (!title || !url || !categoryId) {
-      return NextResponse.json({ error: "Title, URL, and category are required" }, { status: 400 })
+      return NextResponse.json({ error: 'Title, URL, and category are required' }, { status: 400 })
     }
 
     // Create the site
@@ -59,16 +59,16 @@ export async function POST(request: Request) {
           site.imageUrl = icon.iconUrl
         }
       } catch (error) {
-        console.error("Error fetching favicon:", error)
+        console.error('Error fetching favicon:', error)
         // Continue without favicon
       }
     }
 
-    revalidateTag("categories")
+    revalidateTag('categories')
 
     return NextResponse.json(site)
   } catch (error) {
-    console.error("Error creating site:", error)
-    return NextResponse.json({ error: "Failed to create site" }, { status: 500 })
+    console.error('Error creating site:', error)
+    return NextResponse.json({ error: 'Failed to create site' }, { status: 500 })
   }
 }

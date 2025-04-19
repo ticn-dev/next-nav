@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/prisma"
-import { type NextRequest, NextResponse } from "next/server"
+import { prisma } from '@/lib/prisma'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     const { key, value } = await request.json()
 
     if (!key) {
-      return NextResponse.json({ error: "Key is required" }, { status: 400 })
+      return NextResponse.json({ error: 'Key is required' }, { status: 400 })
     }
 
     await prisma.systemSettings.upsert({
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error updating setting:", error)
-    return NextResponse.json({ error: "Failed to update setting" }, { status: 500 })
+    console.error('Error updating setting:', error)
+    return NextResponse.json({ error: 'Failed to update setting' }, { status: 500 })
   }
 }

@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState } from 'react'
 
 interface Settings {
   openInNewTab: boolean
@@ -26,12 +26,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Load settings from localStorage
     try {
-      const savedSettings = localStorage.getItem("nav-settings")
+      const savedSettings = localStorage.getItem('nav-settings')
       if (savedSettings) {
         setSettings(JSON.parse(savedSettings))
       }
     } catch (error) {
-      console.error("Failed to load settings:", error)
+      console.error('Failed to load settings:', error)
     }
     setIsLoaded(true)
   }, [])
@@ -39,7 +39,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Save settings to localStorage when they change
     if (isLoaded) {
-      localStorage.setItem("nav-settings", JSON.stringify(settings))
+      localStorage.setItem('nav-settings', JSON.stringify(settings))
     }
   }, [settings, isLoaded])
 
@@ -53,7 +53,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettings() {
   const context = useContext(SettingsContext)
   if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider")
+    throw new Error('useSettings must be used within a SettingsProvider')
   }
   return context
 }

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -121,7 +121,6 @@
   }
 }
 
-
 .sentinel {
   position: absolute;
   left: 0;
@@ -162,7 +161,9 @@ main {
 }
 
 .dialog-content {
-  animation: fadeIn 0.3s ease-out, slideIn 0.3s ease-out;
+  animation:
+    fadeIn 0.3s ease-out,
+    slideIn 0.3s ease-out;
 }
 
 /* Independent scrolling for categories and content */

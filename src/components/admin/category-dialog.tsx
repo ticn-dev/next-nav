@@ -1,18 +1,11 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
-import { useEffect, useState } from "react"
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { toast } from '@/components/ui/use-toast'
+import { useEffect, useState } from 'react'
 
 interface Category {
   id: number
@@ -28,8 +21,8 @@ interface CategoryDialogProps {
 }
 
 export function CategoryDialog({ open, onOpenChange, category, onSave }: CategoryDialogProps) {
-  const [name, setName] = useState("")
-  const [order, setOrder] = useState("0")
+  const [name, setName] = useState('')
+  const [order, setOrder] = useState('0')
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -38,8 +31,8 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
       setName(category.name)
       setOrder(category.order.toString())
     } else {
-      setName("")
-      setOrder("0")
+      setName('')
+      setOrder('0')
     }
     setErrors({})
   }, [category, open])
@@ -48,15 +41,15 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
     const newErrors: Record<string, string> = {}
 
     if (!name.trim()) {
-      newErrors.name = "名称不能为空"
+      newErrors.name = '名称不能为空'
     }
 
     if (!order.trim()) {
-      newErrors.order = "排序不能为空"
+      newErrors.order = '排序不能为空'
     } else {
       const orderNum = Number.parseInt(order)
       if (isNaN(orderNum) || orderNum < -99999 || orderNum > 99999) {
-        newErrors.order = "排序必须是-99999到99999之间的数字"
+        newErrors.order = '排序必须是-99999到99999之间的数字'
       }
     }
 
@@ -69,13 +62,13 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
 
     setIsSaving(true)
     try {
-      const method = category ? "PUT" : "POST"
-      const endpoint = category ? `/api/admin/categories/${category.id}` : "/api/admin/categories"
+      const method = category ? 'PUT' : 'POST'
+      const endpoint = category ? `/api/admin/categories/${category.id}` : '/api/admin/categories'
 
       const response = await fetch(endpoint, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name,
@@ -87,19 +80,19 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
         const savedCategory = await response.json()
         onSave(savedCategory)
         toast({
-          title: category ? "更新成功" : "添加成功",
-          description: category ? "分类已更新" : "分类已添加",
+          title: category ? '更新成功' : '添加成功',
+          description: category ? '分类已更新' : '分类已添加',
         })
         onOpenChange(false)
       } else {
-        throw new Error(category ? "Failed to update category" : "Failed to add category")
+        throw new Error(category ? 'Failed to update category' : 'Failed to add category')
       }
     } catch (error) {
-      console.error("Error saving category:", error)
+      console.error('Error saving category:', error)
       toast({
-        title: category ? "更新失败" : "添加失败",
-        description: "请稍后重试",
-        variant: "destructive",
+        title: category ? '更新失败' : '添加失败',
+        description: '请稍后重试',
+        variant: 'destructive',
       })
     } finally {
       setIsSaving(false)
@@ -110,8 +103,8 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{category ? "编辑分类" : "添加分类"}</DialogTitle>
-          <DialogDescription>{category ? "修改分类信息" : "添加新的分类到导航页"}</DialogDescription>
+          <DialogTitle>{category ? '编辑分类' : '添加分类'}</DialogTitle>
+          <DialogDescription>{category ? '修改分类信息' : '添加新的分类到导航页'}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {category && (
@@ -127,14 +120,8 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
               名称 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="分类名称"
-                className={errors.name ? "border-destructive" : ""}
-              />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="分类名称" className={errors.name ? 'border-destructive' : ''} />
+              {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -142,14 +129,8 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
               排序 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input
-                id="order"
-                value={order}
-                onChange={(e) => setOrder(e.target.value)}
-                placeholder="0"
-                className={errors.order ? "border-destructive" : ""}
-              />
-              {errors.order && <p className="text-xs text-destructive">{errors.order}</p>}
+              <Input id="order" value={order} onChange={(e) => setOrder(e.target.value)} placeholder="0" className={errors.order ? 'border-destructive' : ''} />
+              {errors.order && <p className="text-destructive text-xs">{errors.order}</p>}
             </div>
           </div>
         </div>
@@ -158,7 +139,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
             关闭
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "保存中..." : "保存"}
+            {isSaving ? '保存中...' : '保存'}
           </Button>
         </DialogFooter>
       </DialogContent>

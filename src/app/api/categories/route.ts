@@ -1,5 +1,5 @@
-import {prisma} from "@/lib/prisma"
-import {NextResponse} from "next/server"
+import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -7,7 +7,7 @@ export async function GET() {
       include: {
         sites: true,
       },
-      orderBy: [{order: "asc"}, {id: "asc"}],
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
     })
 
     // Filter out empty categories in the API response
@@ -15,7 +15,7 @@ export async function GET() {
 
     return NextResponse.json(nonEmptyCategories)
   } catch (error) {
-    console.error("Error fetching categories:", error)
-    return NextResponse.json({error: "Failed to fetch categories"}, {status: 500})
+    console.error('Error fetching categories:', error)
+    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 })
   }
 }
