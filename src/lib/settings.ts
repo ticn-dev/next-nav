@@ -2,7 +2,6 @@ import { prisma } from './prisma'
 
 export type SystemSettings = {
   title: string
-  favicon: string
   copyright: string
 }
 
@@ -27,7 +26,6 @@ export async function getSystemSettings(...columns: string[]): Promise<Partial<S
 
   return {
     title: settings.title || '',
-    favicon: settings.favicon || '',
     copyright: settings.copyright || '',
   }
 }
