@@ -72,6 +72,23 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
 
     if (!url.trim()) {
       newErrors.url = 'URL不能为空'
+    } else {
+      try {
+        new URL(url)
+      } catch {
+        newErrors.url = 'URL格式不正确'
+      }
+    }
+
+    if (imageUrl) {
+      try {
+        const iu = new URL(imageUrl)
+        if (!['http:', 'https:'].includes(iu.protocol)) {
+          newErrors.imageUrl = '图标URL只支持http和https协议'
+        }
+      } catch {
+        newErrors.imageUrl = '图标URL格式不正确'
+      }
     }
 
     if (useNewCategory) {
@@ -204,7 +221,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               URL *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com" className={errors.url ? 'border-destructive' : ''} />
+              <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="schema://hostname" className={errors.url ? 'border-destructive' : ''} />
               {errors.url && <p className="text-destructive text-xs">{errors.url}</p>}
             </div>
           </div>
@@ -212,7 +229,16 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
             <Label htmlFor="imageUrl" className="text-right">
               图标URL
             </Label>
-            <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/favicon.ico" className="col-span-3" />
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/favicon.ico"
+                className={errors.imageUrl ? 'border-destructive' : ''}
+              />
+              {errors.imageUrl && <p className="text-destructive text-xs">{errors.imageUrl}</p>}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">
