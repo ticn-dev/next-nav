@@ -16,23 +16,23 @@ export async function fetchIcon(url: string): Promise<{ iconUrl: string; iconDat
     // Try each location until we find one that works
     for (const iconUrl of iconLocations) {
       try {
-        const response = await fetch(iconUrl, { method: "GET" })
+        const response = await fetch(iconUrl, {method: "GET"})
         if (response.ok) {
           const iconData = new Uint8Array(await response.arrayBuffer())
-          return { iconUrl, iconData }
+          return {iconUrl, iconData}
         }
       } catch (e) {
         // Continue to next location
-        console.log(`Failed to fetch icon from ${iconUrl}`)
+        console.error("Error fetching icon from", iconUrl, e)
       }
     }
 
     // If all else fails, use Google's favicon service
     const googleIconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-    const response = await fetch(googleIconUrl, { method: "GET" })
+    const response = await fetch(googleIconUrl, {method: "GET"})
     if (response.ok) {
       const iconData = new Uint8Array(await response.arrayBuffer())
-      return { iconUrl: googleIconUrl, iconData }
+      return {iconUrl: googleIconUrl, iconData}
     }
 
     return undefined

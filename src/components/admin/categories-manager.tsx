@@ -67,6 +67,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
         throw new Error("Failed to refresh categories")
       }
     } catch (error) {
+      console.error("Error refreshing categories:", error)
       toast({
         title: "刷新失败",
         description: "请稍后重试",
@@ -110,6 +111,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
         throw new Error("Failed to delete category")
       }
     } catch (error) {
+      console.error("Error deleting category:", error)
       toast({
         title: "删除失败",
         description: "请稍后重试",

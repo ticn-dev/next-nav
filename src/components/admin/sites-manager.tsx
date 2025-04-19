@@ -9,7 +9,6 @@ import { toast } from "@/components/ui/use-toast"
 import { Edit, Plus, RefreshCw, Trash } from "lucide-react"
 import { useEffect, useState } from "react"
 import { SiteDialog } from "./site-dialog"
-import { AdminFooter } from "./admin-footer"
 import { DeleteConfirmDialog } from "./delete-confirm-dialog"
 import Image from "next/image"
 
@@ -93,6 +92,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
         throw new Error("Failed to refresh sites")
       }
     } catch (error) {
+      console.error("Error refreshing sites:", error)
       toast({
         title: "刷新失败",
         description: "请稍后重试",
@@ -136,6 +136,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
         throw new Error("Failed to delete site")
       }
     } catch (error) {
+      console.error("Error deleting site:", error)
       toast({
         title: "删除失败",
         description: "请稍后重试",

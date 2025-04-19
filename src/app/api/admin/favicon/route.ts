@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/prisma"
 import {type NextRequest, NextResponse} from "next/server"
 import {updateSystemSetting} from "@/lib/settings";
+import {revalidateTag} from "next/cache";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,7 @@ export async function POST(request: NextRequest) {
       await prisma.systemSettings.delete({
         where: {key: "favicon"},
       })
+      revalidateTag("categories")
       return NextResponse.json({faviconUrl: null})
     }
 

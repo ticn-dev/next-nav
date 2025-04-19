@@ -2,9 +2,9 @@ import {prisma} from "@/lib/prisma"
 import {type NextRequest, NextResponse} from "next/server"
 import {getSystemSettings} from "@/lib/settings";
 
-export async function GET(request: NextRequest, {params: _params}: { params: Promise<{ id: string }> | { id: string } }) {
+export async function GET(request: NextRequest, {params: _params}: { params: Promise<{ id: string }> }) {
   try {
-    const params = _params instanceof Promise ? await _params : _params
+    const params = await _params
     if (params.id === "this") {
       // return this system icon
       const settings = await getSystemSettings('favicon')

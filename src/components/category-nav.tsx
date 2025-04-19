@@ -8,7 +8,7 @@ interface Category {
   id: number
   name: string
   order: number
-  sites: any[]
+  sites: unknown[]
 }
 
 interface CategoryNavProps {

@@ -68,6 +68,7 @@ export function FaviconUploader({initialFavicon, onUpdate}: FaviconUploaderProps
         throw new Error("Failed to upload favicon")
       }
     } catch (error) {
+      console.error("Error uploading favicon:", error)
       toast({
         title: "上传失败",
         description: "请稍后重试",

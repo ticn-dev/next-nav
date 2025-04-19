@@ -33,6 +33,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@eslint/config-helpers": "^0.2.1",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",

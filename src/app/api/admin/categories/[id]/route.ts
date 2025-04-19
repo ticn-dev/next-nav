@@ -1,9 +1,10 @@
 import {prisma} from "@/lib/prisma"
+import { revalidateTag } from "next/cache"
 import {type NextRequest, NextResponse} from "next/server"
 
-export async function GET(request: NextRequest, {params: _params}: { params: Promise<{ id: string }> | { id: string } }) {
+export async function GET(request: NextRequest, {params: _params}: { params: Promise<{ id: string }> }) {
   try {
-    const params = _params instanceof Promise ? await _params : _params
+    const params = await _params
     const id = Number.parseInt(params.id)
     if (isNaN(id)) {
       return NextResponse.json({error: "Invalid ID"}, {status: 400})
@@ -25,8 +26,9 @@ export async function GET(request: NextRequest, {params: _params}: { params: Pro
   }
 }
 
-export async function PUT(request: NextRequest, {params}: { params: { id: string } }) {
+export async function PUT(request: NextRequest, {params: _params}: { params: Promise<{ id: string }> }) {
   try {
+    const params = await _params
     const id = Number.parseInt(params.id)
     if (isNaN(id)) {
       return NextResponse.json({error: "Invalid ID"}, {status: 400})
@@ -46,6 +48,8 @@ export async function PUT(request: NextRequest, {params}: { params: { id: string
       },
     })
 
+    revalidateTag("categories")
+
     return NextResponse.json(category)
   } catch (error) {
     console.error("Error updating category:", error)
@@ -53,8 +57,9 @@ export async function PUT(request: NextRequest, {params}: { params: { id: string
   }
 }
 
-export async function DELETE(request: NextRequest, {params}: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, {params:_params}: { params: Promise<{ id: string }> }) {
   try {
+    const params = await _params
     const id = Number.parseInt(params.id)
     if (isNaN(id)) {
       return NextResponse.json({error: "Invalid ID"}, {status: 400})
@@ -63,6 +68,8 @@ export async function DELETE(request: NextRequest, {params}: { params: { id: str
     await prisma.category.delete({
       where: {id},
     })
+
+    revalidateTag("categories")
 
     return NextResponse.json({success: true})
   } catch (error) {

@@ -1,5 +1,4 @@
 export async function register() {
-  console.log('register instrumentation')
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import ('./instrumentation-node')
   }

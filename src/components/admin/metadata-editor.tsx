@@ -117,6 +117,7 @@ export function MetadataEditor({initialMetadata, onUpdate}: MetadataEditorProps)
         throw new Error("Failed to save metadata")
       }
     } catch (error) {
+      console.error("Error saving metadata:", error)
       toast({
         title: "保存失败",
         description: "请稍后重试",

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { fetchIcon } from "@/lib/favicon"
 import { NextResponse } from "next/server"
+import {revalidateTag} from "next/cache";
 
 export async function GET() {
   try {
@@ -62,6 +63,8 @@ export async function POST(request: Request) {
         // Continue without favicon
       }
     }
+
+    revalidateTag("categories")
 
     return NextResponse.json(site)
   } catch (error) {

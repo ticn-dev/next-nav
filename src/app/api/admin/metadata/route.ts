@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { type NextRequest, NextResponse } from "next/server"
+import {revalidateTag} from "next/cache";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
 
       return newMetadata
     })
+
+    revalidateTag("categories")
 
     return NextResponse.json(result)
   } catch (error) {

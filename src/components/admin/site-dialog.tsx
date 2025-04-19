@@ -139,6 +139,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
         throw new Error(site ? "Failed to update site" : "Failed to add site")
       }
     } catch (error) {
+      console.error("Error saving site:", error)
       toast({
         title: site ? "更新失败" : "添加失败",
         description: "请稍后重试",

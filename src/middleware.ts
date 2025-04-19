@@ -1,4 +1,3 @@
-// middleware.js
 import {NextRequest, NextResponse} from 'next/server';
 import {prisma} from "@/lib/prisma";
 import crypto from "crypto";
@@ -62,9 +61,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: 'nodejs',
   matcher: [
     '/admin/:path*',
     '/api/admin/:path*',
   ],
-  runtime: 'nodejs'
 };

@@ -73,6 +73,7 @@ export function LoginSettings({initialUsername}: LoginSettingsProps) {
         throw new Error("Failed to update admin account")
       }
     } catch (error) {
+      console.error("Error saving admin account:", error)
       toast({
         title: "保存失败",
         description: "请稍后重试",

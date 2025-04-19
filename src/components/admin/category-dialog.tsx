@@ -95,6 +95,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
         throw new Error(category ? "Failed to update category" : "Failed to add category")
       }
     } catch (error) {
+      console.error("Error saving category:", error)
       toast({
         title: category ? "更新失败" : "添加失败",
         description: "请稍后重试",
