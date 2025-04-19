@@ -31,15 +31,18 @@ interface SiteDialogProps {
   onOpenChange: (open: boolean) => void
   site: Site | null
   categories: Category[]
+  onCategoryCreate: (categories: Category) => void
   onSave: (site: Site) => void
 }
 
-export function SiteDialog({ open, onOpenChange, site, categories, onSave }: SiteDialogProps) {
+export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCreate, onSave }: SiteDialogProps) {
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [useNewCategory, setUseNewCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
   const [order, setOrder] = useState('0')
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -63,6 +66,16 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
     setErrors({})
   }, [site, categories, open])
 
+  const handleCategoryChange = (value: string) => {
+    if (value === '#new') {
+      setUseNewCategory(true)
+      setCategoryId('')
+    } else {
+      setUseNewCategory(false)
+      setCategoryId(value)
+    }
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
@@ -76,8 +89,16 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
       newErrors.url = 'URL不能为空'
     }
 
-    if (!categoryId) {
-      newErrors.categoryId = '请选择分类'
+    if (useNewCategory) {
+      if (!newCategoryName.trim()) {
+        newErrors.categoryId = '新分类名称不能为空'
+      } else if (newCategoryName.length > 20) {
+        newErrors.categoryId = '新分类名称不能超过20个字符'
+      }
+    } else {
+      if (!categoryId) {
+        newErrors.categoryId = '请选择分类'
+      }
     }
 
     if (!order.trim()) {
@@ -102,6 +123,31 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
 
     setIsSaving(true)
     try {
+      let categoryIdStr = categoryId
+      if (useNewCategory) {
+        const newCategoryResponse = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: newCategoryName,
+            order: 0,
+          }),
+        })
+
+        if (newCategoryResponse.ok) {
+          const newCategory = await newCategoryResponse.json()
+          categoryIdStr = newCategory.id.toString()
+          onCategoryCreate(newCategory)
+          setCategoryId(categoryIdStr)
+          setUseNewCategory(false)
+          setNewCategoryName('')
+        } else {
+          throw new Error('Failed to create new category')
+        }
+      }
+
       const method = site ? 'PUT' : 'POST'
       const endpoint = site ? `/api/admin/sites/${site.id}` : '/api/admin/sites'
 
@@ -115,7 +161,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
           url,
           imageUrl: imageUrl || null,
           description: description || null,
-          categoryId: Number.parseInt(categoryId),
+          categoryId: Number.parseInt(categoryIdStr),
           order: Number.parseInt(order),
         }),
       })
@@ -188,18 +234,31 @@ export function SiteDialog({ open, onOpenChange, site, categories, onSave }: Sit
               分类 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className={errors.categoryId ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="选择分类" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name}
+              {useNewCategory ? (
+                <Input
+                  id="newCategory"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="新分类名称"
+                  className={errors.categoryId ? 'border-destructive' : ''}
+                />
+              ) : (
+                <Select value={categoryId} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className={errors.categoryId ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="选择分类" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="#new" className="text-purple-500 focus:text-purple-500">
+                      新建分类
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              )}
               {errors.categoryId && <p className="text-destructive text-xs">{errors.categoryId}</p>}
             </div>
           </div>

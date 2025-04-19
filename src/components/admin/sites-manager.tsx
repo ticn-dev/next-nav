@@ -31,12 +31,13 @@ interface Site {
 
 interface SitesManagerProps {
   initialSites: Site[]
-  categories: Category[]
+  initialCategories: Category[]
 }
 
-export function SitesManager({ initialSites, categories }: SitesManagerProps) {
+export function SitesManager({ initialSites, initialCategories }: SitesManagerProps) {
   const [sites, setSites] = useState<Site[]>(initialSites)
   const [filteredSites, setFilteredSites] = useState<Site[]>(initialSites)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -154,6 +155,10 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
     setDialogOpen(false)
   }
 
+  const handleCategoryCreate = (newCategory: Category) => {
+    setCategories([...categories, newCategory])
+  }
+
   return (
     <div className="space-y-4">
       <Card className="p-4">
@@ -269,7 +274,7 @@ export function SitesManager({ initialSites, categories }: SitesManagerProps) {
         </div>
       </div>
 
-      <SiteDialog open={dialogOpen} onOpenChange={setDialogOpen} site={editingSite} categories={categories} onSave={handleSaveSite} />
+      <SiteDialog open={dialogOpen} onOpenChange={setDialogOpen} site={editingSite} categories={categories} onSave={handleSaveSite} onCategoryCreate={handleCategoryCreate} />
 
       <DeleteConfirmDialog
         open={deleteDialogOpen}
