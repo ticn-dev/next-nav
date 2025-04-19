@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return newMetadata
     })
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json(result)
   } catch (error) {

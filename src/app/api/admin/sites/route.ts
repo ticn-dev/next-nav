@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma'
 import { fetchIcon } from '@/lib/favicon'
 import { NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
+import { submitBgTask } from '@/lib/background-task'
+import { saveData } from '@/lib/uploads'
+import { resolveIconPath } from '@/lib/path-resolver'
 
 export async function GET() {
   try {
@@ -44,27 +47,26 @@ export async function POST(request: Request) {
 
     // If no image URL is provided, try to fetch the favicon
     if (!imageUrl) {
-      try {
-        const icon = await fetchIcon(url)
-        if (icon) {
-          await prisma.site.update({
-            where: { id: site.id },
-            data: {
-              imageUrl: icon.iconUrl,
-              iconData: icon.iconData,
-            },
-          })
+      submitBgTask(async () => {
+        try {
+          const icon = await fetchIcon(url)
+          if (icon) {
+            const iconPath = resolveIconPath(site.id)
+            const url = icon.iconUrl
+            const slashIdx = url.lastIndexOf('/')
+            const dotIdx = url.lastIndexOf('.')
+            const ext = dotIdx > slashIdx ? url.substring(dotIdx) : undefined
 
-          // Update the site object with the new image URL
-          site.imageUrl = icon.iconUrl
+            await saveData(iconPath, icon.iconData, { 'content-type': icon.contentType, 'file-ext': ext })
+          }
+        } catch (error) {
+          console.error('Error fetching favicon:', error)
+          // Continue without favicon
         }
-      } catch (error) {
-        console.error('Error fetching favicon:', error)
-        // Continue without favicon
-      }
+      })
     }
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json(site)
   } catch (error) {

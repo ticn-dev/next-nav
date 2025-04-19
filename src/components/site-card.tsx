@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Globe } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
-import { Site } from '@prisma/client'
+import { Site } from '@/types/site'
 
 interface SiteCardProps {
   site: Site
@@ -27,7 +27,7 @@ export function SiteCard({ site }: SiteCardProps) {
     <Card className="overflow-hidden transition-shadow hover:shadow-md" onClick={handleClick} role="link" tabIndex={0}>
       <CardHeader className="flex flex-row items-center gap-3 p-4">
         {!imageError ? (
-          <Image src={iconUrl || '/placeholder.svg'} alt={site.title} width={24} height={24} className="h-6 w-6 object-contain" onError={() => setImageError(true)} loading="lazy" />
+          <Image src={iconUrl} alt={site.title} width={24} height={24} className="h-6 w-6 object-contain" onError={() => setImageError(true)} loading="lazy" />
         ) : (
           <Globe className="h-6 w-6" />
         )}

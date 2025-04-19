@@ -8,5 +8,8 @@ export interface Site {
   imageUrl: string | null
   order: number
   categoryId: number
+}
+
+export interface SiteWithCategory extends Site {
   category: Category
 }

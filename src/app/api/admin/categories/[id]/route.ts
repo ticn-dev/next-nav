@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       },
     })
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json(category)
   } catch (error) {
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest, { params: _params }: { params
       where: { id },
     })
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json({ success: true })
   } catch (error) {

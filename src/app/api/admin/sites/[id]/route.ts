@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma'
 import { fetchIcon } from '@/lib/favicon'
 import { type NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
+import { submitBgTask } from '@/lib/background-task'
+import { resolveIconPath } from '@/lib/path-resolver'
+import { saveData } from '@/lib/uploads'
 
 export async function GET(request: NextRequest, { params: _params }: { params: Promise<{ id: string }> }) {
   try {
@@ -41,12 +44,6 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       return NextResponse.json({ error: 'Title, URL, and category are required' }, { status: 400 })
     }
 
-    // Get the current site
-    const currentSite = await prisma.site.findUnique({
-      where: { id },
-      select: { imageUrl: true },
-    })
-
     // Update the site
     const site = await prisma.site.update({
       where: { id },
@@ -63,29 +60,27 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       },
     })
 
-    // If image URL has changed and is now empty, try to fetch the favicon
-    if (currentSite?.imageUrl && !imageUrl) {
-      try {
-        const icon = await fetchIcon(url)
-        if (icon) {
-          await prisma.site.update({
-            where: { id },
-            data: {
-              imageUrl: icon.iconUrl,
-              iconData: icon.iconData,
-            },
-          })
+    if (!imageUrl) {
+      submitBgTask(async () => {
+        try {
+          const icon = await fetchIcon(url)
+          if (icon) {
+            const iconPath = resolveIconPath(site.id)
+            const url = icon.iconUrl
+            const slashIdx = url.lastIndexOf('/')
+            const dotIdx = url.lastIndexOf('.')
+            const ext = dotIdx > slashIdx ? url.substring(dotIdx) : undefined
 
-          // Update the site object with the new image URL
-          site.imageUrl = icon.iconUrl
+            await saveData(iconPath, icon.iconData, { 'content-type': icon.contentType, 'file-ext': ext })
+          }
+        } catch (error) {
+          console.error('Error fetching favicon:', error)
+          // Continue without favicon
         }
-      } catch (error) {
-        console.error('Error fetching favicon:', error)
-        // Continue without favicon
-      }
+      })
     }
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json(site)
   } catch (error) {
@@ -106,7 +101,7 @@ export async function DELETE(request: NextRequest, { params: _params }: { params
       where: { id },
     })
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json({ success: true })
   } catch (error) {

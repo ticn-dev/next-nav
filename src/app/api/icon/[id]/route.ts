@@ -1,27 +1,30 @@
 import { prisma } from '@/lib/prisma'
 import { type NextRequest, NextResponse } from 'next/server'
-import { getSystemSettings } from '@/lib/settings'
+import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
+import { readData } from '@/lib/uploads'
+
+async function _responseIconData(id: string | number) {
+  const systemIcon = resolveIconPath(id)
+  const iconData = await readData(systemIcon)
+  if (iconData == null) {
+    return new NextResponse(null, { status: 404 })
+  }
+  const contentType = iconData.metadata['content-type']
+  const fileExt = iconData.metadata['file-ext']
+  return new NextResponse(iconData.data, {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'x-favicon-type': fileExt,
+    },
+  })
+}
 
 export async function GET(request: NextRequest, { params: _params }: { params: Promise<{ id: string }> }) {
   try {
     const params = await _params
     if (params.id === 'this') {
-      // return this system icon
-      const settings = await getSystemSettings('favicon')
-      const favicon = settings.favicon
-      if (favicon) {
-        const [fileExt, mimeType, base64] = favicon.split(';', 3)
-        const buffer = Buffer.from(base64, 'base64')
-        return new NextResponse(buffer, {
-          headers: {
-            'Content-Type': mimeType,
-            'Cache-Control': 'public, max-age=31536000, immutable',
-            'x-favicon-type': fileExt,
-          },
-        })
-      } else {
-        return new NextResponse(null, { status: 404 })
-      }
+      return _responseIconData(SystemIconId)
     }
 
     const id = Number.parseInt(params.id)
@@ -31,21 +34,11 @@ export async function GET(request: NextRequest, { params: _params }: { params: P
 
     const site = await prisma.site.findUnique({
       where: { id },
-      select: { iconData: true, imageUrl: true },
+      select: { imageUrl: true },
     })
 
     if (!site) {
       return new NextResponse(null, { status: 404 })
-    }
-
-    // If we have icon data, return it
-    if (site.iconData) {
-      return new NextResponse(site.iconData, {
-        headers: {
-          'Content-Type': 'image/png',
-          'Cache-Control': 'public, max-age=31536000, immutable',
-        },
-      })
     }
 
     // If we have an image URL, redirect to it
@@ -53,8 +46,7 @@ export async function GET(request: NextRequest, { params: _params }: { params: P
       return NextResponse.redirect(site.imageUrl)
     }
 
-    // Otherwise, return 404
-    return new NextResponse(null, { status: 404 })
+    return _responseIconData(id)
   } catch (error) {
     console.error('Error fetching icon:', error)
     return new NextResponse(null, { status: 500 })

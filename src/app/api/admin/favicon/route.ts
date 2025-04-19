@@ -1,18 +1,18 @@
-import { prisma } from '@/lib/prisma'
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateSystemSetting } from '@/lib/settings'
 import { revalidateTag } from 'next/cache'
+import { deleteData, saveData } from '@/lib/uploads'
+import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('favicon') as File | null
 
+    const iconPath = resolveIconPath(SystemIconId)
+
     if (!file) {
-      await prisma.systemSettings.delete({
-        where: { key: 'favicon' },
-      })
-      revalidateTag('categories')
+      await deleteData(iconPath)
+      revalidateTag('index')
       return NextResponse.json({ faviconUrl: null })
     }
 
@@ -28,10 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     // base64 of favicon
-    const b64Str = Buffer.from(await file.arrayBuffer()).toString('base64')
-
     const fileExt = file.name.split('.').pop()
-    await updateSystemSetting('favicon', `${fileExt};${file.type};${b64Str}`)
+    await saveData(iconPath, await file.bytes(), { 'content-type': file.type, 'file-ext': fileExt })
 
     return NextResponse.json({ faviconUrl: '/api/icon/this' })
   } catch (error) {

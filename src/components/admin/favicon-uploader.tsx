@@ -5,7 +5,7 @@ import type React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
-import { Upload } from 'lucide-react'
+import { Globe, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 
@@ -17,6 +17,7 @@ interface FaviconUploaderProps {
 export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderProps) {
   const [favicon, setFavicon] = useState(initialFavicon)
   const [isUploading, setIsUploading] = useState(false)
+  const [iconError, setIconError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +59,7 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
         const data = await response.json()
         const newFaviconUrl = `${data.faviconUrl}?t=${Date.now()}`
         setFavicon(newFaviconUrl) // Force refresh the image
+        setIconError(false) // Reset error state
         toast({
           title: '上传成功',
           description: '网站图标已更新',
@@ -79,6 +81,10 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
     }
   }
 
+  const handleFaviconLoadError = () => {
+    setIconError(true)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -87,13 +93,11 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-center">
-          {favicon ? (
-            <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
-              <Image src={favicon || '/placeholder.svg'} alt="网站图标" fill className="object-contain" />
-            </div>
+          {iconError ? (
+            <Globe className="h-32 w-32" />
           ) : (
-            <div className="flex h-32 w-32 items-center justify-center rounded-lg border">
-              <p className="text-muted-foreground text-sm">无图标</p>
+            <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
+              <Image src={favicon} onError={handleFaviconLoadError} alt="网站图标" fill className="object-contain" />
             </div>
           )}
         </div>

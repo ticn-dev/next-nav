@@ -6,22 +6,26 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from '@/components/ui/use-toast'
-import { Edit, Plus, RefreshCw, Trash } from 'lucide-react'
+import { Edit, Globe, Plus, RefreshCw, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SiteDialog } from './site-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import Image from 'next/image'
-import { Site } from '@/types/site'
+import { Site, SiteWithCategory } from '@/types/site'
 import { Category } from '@/types/category'
 
 interface SitesManagerProps {
-  initialSites: Site[]
+  initialSites: SiteWithCategory[]
   initialCategories: Category[]
 }
 
+interface LoadableSiteWithCategory extends SiteWithCategory {
+  imageLoadError?: boolean
+}
+
 export function SitesManager({ initialSites, initialCategories }: SitesManagerProps) {
-  const [sites, setSites] = useState<Site[]>(initialSites)
-  const [filteredSites, setFilteredSites] = useState<Site[]>(initialSites)
+  const [sites, setSites] = useState<LoadableSiteWithCategory[]>(initialSites)
+  const [filteredSites, setFilteredSites] = useState<LoadableSiteWithCategory[]>(initialSites)
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -30,9 +34,9 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(Math.ceil(initialSites.length / pageSize))
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingSite, setEditingSite] = useState<Site | null>(null)
+  const [editingSite, setEditingSite] = useState<LoadableSiteWithCategory | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [siteToDelete, setSiteToDelete] = useState<Site | null>(null)
+  const [siteToDelete, setSiteToDelete] = useState<LoadableSiteWithCategory | null>(null)
 
   // Filter and paginate sites
   useEffect(() => {
@@ -89,12 +93,12 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
     setDialogOpen(true)
   }
 
-  const handleEditSite = (site: Site) => {
+  const handleEditSite = (site: LoadableSiteWithCategory) => {
     setEditingSite(site)
     setDialogOpen(true)
   }
 
-  const handleDeleteSite = (site: Site) => {
+  const handleDeleteSite = (site: LoadableSiteWithCategory) => {
     setSiteToDelete(site)
     setDeleteDialogOpen(true)
   }
@@ -130,18 +134,31 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
   }
 
   const handleSaveSite = (savedSite: Site) => {
+    // 这里是来自服务端的site结构,带有category,而且不包含imageLoadError
+    const site = savedSite as LoadableSiteWithCategory
     if (editingSite) {
       // Update existing site
-      setSites(sites.map((site) => (site.id === savedSite.id ? savedSite : site)))
+      setSites(sites.map((site) => (site.id === site.id ? site : site)))
     } else {
       // Add new site
-      setSites([...sites, savedSite])
+      setSites([...sites, site])
     }
     setDialogOpen(false)
   }
 
   const handleCategoryCreate = (newCategory: Category) => {
     setCategories([...categories, newCategory])
+  }
+
+  const handleImageLoadError = (site: SiteWithCategory) => {
+    setSites((prevSites) =>
+      prevSites.map((s) => {
+        if (s.id === site.id) {
+          return { ...s, imageLoadError: true }
+        }
+        return s
+      }),
+    )
   }
 
   return (
@@ -200,10 +217,17 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
                   <TableCell className="hidden md:table-cell">{site.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {site.imageUrl ? (
-                        <Image src={site.imageUrl || '/placeholder.svg'} alt={site.title} width={20} height={20} className="h-5 w-5 rounded-sm object-contain" />
+                      {site.imageLoadError === true ? (
+                        <Globe className="h-5 w-5" />
                       ) : (
-                        <div className="bg-muted h-5 w-5 rounded-sm" />
+                        <Image
+                          src={site.imageUrl || `/api/icon/${site.id}`}
+                          alt={site.title}
+                          width={20}
+                          height={20}
+                          onError={() => handleImageLoadError(site)}
+                          className="h-5 w-5 rounded-sm object-contain"
+                        />
                       )}
                       <span className="font-medium">{site.title}</span>
                     </div>

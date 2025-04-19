@@ -26,8 +26,8 @@ const getCachedCategories = unstable_cache(
     // Filter out empty categories
     return categories.filter((category) => category.sites.length > 0)
   },
-  ['categories'],
-  { revalidate: 3600, tags: ['categories'] },
+  ['index'],
+  { revalidate: 3600, tags: ['index'] },
 )
 
 export async function generateMetadata(): Promise<Metadata> {

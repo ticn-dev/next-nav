@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       },
     })
 
-    revalidateTag('categories')
+    revalidateTag('index')
 
     return NextResponse.json(category)
   } catch (error) {
