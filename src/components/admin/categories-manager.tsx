@@ -15,6 +15,7 @@ interface Category {
   id: number
   name: string
   order: number
+  sites: { id: number }[]
 }
 
 interface CategoriesManagerProps {
@@ -160,6 +161,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
             <TableRow>
               <TableHead className="hidden w-[80px] md:table-cell">ID</TableHead>
               <TableHead>名称</TableHead>
+              <TableHead className="hidden lg:table-cell">站点数</TableHead>
               <TableHead className="hidden sm:table-cell">排序</TableHead>
               <TableHead className="w-[100px] text-right">操作</TableHead>
             </TableRow>
@@ -179,6 +181,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
                     <span className="font-medium">{category.name}</span>
                     {category.id === -1 && <Badge className="ml-2 bg-blue-400">默认</Badge>}
                   </TableCell>
+                  <TableCell className="hidden lg:table-cell">{category.sites.length}</TableCell>
                   <TableCell className="hidden sm:table-cell">{category.order}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

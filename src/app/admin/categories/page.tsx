@@ -5,6 +5,13 @@ export const dynamic = 'force-dynamic'
 
 async function getCategories() {
   const categories = await prisma.category.findMany({
+    include: {
+      sites: {
+        select: {
+          id: true,
+        },
+      },
+    },
     orderBy: [{ order: 'asc' }, { id: 'asc' }],
   })
 

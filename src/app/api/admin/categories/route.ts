@@ -5,6 +5,13 @@ import { revalidateTag } from 'next/cache'
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
+      include: {
+        sites: {
+          select: {
+            id: true,
+          },
+        },
+      },
       orderBy: [{ order: 'asc' }, { id: 'asc' }],
     })
 
