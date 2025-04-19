@@ -13,10 +13,9 @@ import { SystemSettingsRecord } from '@/types/settings'
 
 interface SystemSettingsProps {
   initialSettings: SystemSettingsRecord
-  onInitialSettingsChange?: (settings: Partial<SystemSettingsRecord>) => void
 }
 
-export function SystemSettings({ initialSettings, onInitialSettingsChange }: SystemSettingsProps) {
+export function SystemSettings({ initialSettings }: SystemSettingsProps) {
   const [title, setTitle] = useState(initialSettings.title)
   const [copyright, setCopyright] = useState(initialSettings.copyright)
   const [isSaving, setIsSaving] = useState(false)
@@ -40,7 +39,6 @@ export function SystemSettings({ initialSettings, onInitialSettingsChange }: Sys
           title: '保存成功',
           description: '网站标题已更新',
         })
-        onInitialSettingsChange?.({ title })
         const currentTitle = document.title
         const prefix = currentTitle.split('|', 2)[0].trim()
         document.title = `${prefix} | ${title || 'Next Nav'}`
@@ -91,10 +89,10 @@ export function SystemSettings({ initialSettings, onInitialSettingsChange }: Sys
           </Card>
         </TabsContent>
         <TabsContent value="metadata">
-          <MetadataEditor initialMetadata={initialSettings.metadata} onUpdate={(metadata) => onInitialSettingsChange?.({ metadata })} />
+          <MetadataEditor initialMetadata={initialSettings.metadata}/>
         </TabsContent>
         <TabsContent value="favicon">
-          <FaviconUploader initialFavicon={initialSettings.favicon} onUpdate={(favicon) => onInitialSettingsChange?.({ favicon })} />
+          <FaviconUploader initialFavicon="/api/icon/this"/>
         </TabsContent>
       </Tabs>
     </div>
