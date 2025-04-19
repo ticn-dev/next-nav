@@ -9,8 +9,8 @@ async function _responseIconData(id: string | number) {
   if (iconData == null) {
     return new NextResponse(null, { status: 404 })
   }
-  const contentType = iconData.metadata['content-type']
-  const fileExt = iconData.metadata['file-ext']
+  const contentType = iconData.metadata['content-type'] as string
+  const fileExt = iconData.metadata['file-ext'] as string
   return new NextResponse(iconData.data, {
     headers: {
       'Content-Type': contentType,
