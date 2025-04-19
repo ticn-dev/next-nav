@@ -8,23 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-}
-
-interface Site {
-  id: number
-  title: string
-  description: string | null
-  url: string
-  imageUrl: string | null
-  order: number
-  categoryId: number
-  category: Category
-}
+import { Site } from '@/types/site'
+import { Category } from '@/types/category'
 
 interface SiteDialogProps {
   open: boolean

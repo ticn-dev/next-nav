@@ -3,13 +3,7 @@
 import { cn } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/button'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-  sites: unknown[]
-}
+import { Category } from '@/types/category'
 
 interface CategoryNavProps {
   className?: string

@@ -10,30 +10,24 @@ import { useEffect, useState } from 'react'
 import { CategoryDialog } from './category-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import { Badge } from '@/components/ui/badge'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-  sites: { id: number }[]
-}
+import { Category, CategoryWithSiteIds } from '@/types/category'
 
 interface CategoriesManagerProps {
-  initialCategories: Category[]
+  initialCategories: CategoryWithSiteIds[]
 }
 
 export function CategoriesManager({ initialCategories }: CategoriesManagerProps) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [filteredCategories, setFilteredCategories] = useState<Category[]>(initialCategories)
+  const [categories, setCategories] = useState<CategoryWithSiteIds[]>(initialCategories)
+  const [filteredCategories, setFilteredCategories] = useState<CategoryWithSiteIds[]>(initialCategories)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(Math.ceil(initialCategories.length / pageSize))
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [editingCategory, setEditingCategory] = useState<CategoryWithSiteIds | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+  const [categoryToDelete, setCategoryToDelete] = useState<CategoryWithSiteIds | null>(null)
 
   // Filter and paginate categories
   useEffect(() => {
@@ -85,12 +79,12 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
     setDialogOpen(true)
   }
 
-  const handleEditCategory = (category: Category) => {
+  const handleEditCategory = (category: CategoryWithSiteIds) => {
     setEditingCategory(category)
     setDialogOpen(true)
   }
 
-  const handleDeleteCategory = (category: Category) => {
+  const handleDeleteCategory = (category: CategoryWithSiteIds) => {
     setCategoryToDelete(category)
     setDeleteDialogOpen(true)
   }
@@ -126,12 +120,26 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
   }
 
   const handleSaveCategory = (savedCategory: Category) => {
+    const newCategory = savedCategory as CategoryWithSiteIds
     if (editingCategory) {
+      const oldIndex = categories.findIndex((category) => category.id === editingCategory.id)
+      if (oldIndex === -1) {
+        toast({
+          title: '错误',
+          description: '编辑的分类不存在',
+          variant: 'destructive',
+        })
+        return
+      }
+      const oldCategory = categories[oldIndex]
+      const newArray = [...categories]
+      newArray[oldIndex] = { ...oldCategory, ...newCategory }
       // Update existing category
-      setCategories(categories.map((category) => (category.id === savedCategory.id ? savedCategory : category)))
+      setCategories(newArray)
     } else {
       // Add new category
-      setCategories([...categories, savedCategory])
+      newCategory.sites = []
+      setCategories([...categories, newCategory])
     }
     setDialogOpen(false)
   }

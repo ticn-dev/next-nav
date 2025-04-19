@@ -11,23 +11,8 @@ import { useEffect, useState } from 'react'
 import { SiteDialog } from './site-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import Image from 'next/image'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-}
-
-interface Site {
-  id: number
-  title: string
-  description: string | null
-  url: string
-  imageUrl: string | null
-  order: number
-  categoryId: number
-  category: Category
-}
+import { Site } from '@/types/site'
+import { Category } from '@/types/category'
 
 interface SitesManagerProps {
   initialSites: Site[]

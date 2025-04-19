@@ -9,19 +9,7 @@ import { useState } from 'react'
 import { MetadataEditor } from './metadata-editor'
 import { FaviconUploader } from './favicon-uploader'
 import { toast } from '@/components/ui/use-toast'
-
-interface MetaData {
-  id: number
-  key: string
-  value: string
-}
-
-interface SystemSettingsRecord {
-  title: string
-  copyright: string
-  favicon: string
-  metadata: MetaData[]
-}
+import { SystemSettingsRecord } from '@/types/settings'
 
 interface SystemSettingsProps {
   initialSettings: SystemSettingsRecord

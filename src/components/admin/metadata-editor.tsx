@@ -9,18 +9,16 @@ import { toast } from '@/components/ui/use-toast'
 import { Plus, Trash } from 'lucide-react'
 import { useState } from 'react'
 
-interface MetaData {
-  id: number
-  key: string
-  value: string
-}
+import { MetaData } from '@/types/metadata'
 
-interface EditableMetaData {
+interface EditableMetaData extends MetaData {
   id: number
   key: string
   value: string
   [isCustomKey]: boolean
 }
+
+const isCustomKey = Symbol('isCustomKey')
 
 interface MetadataEditorProps {
   initialMetadata: MetaData[]
@@ -44,8 +42,6 @@ const predefinedKeys = new Set([
 ])
 
 const predefinedKeysArray = Array.from(predefinedKeys.values())
-
-const isCustomKey = Symbol('isCustomKey')
 
 export function MetadataEditor({ initialMetadata, onUpdate }: MetadataEditorProps) {
   const [metadata, setMetadata] = useState<EditableMetaData[]>(

@@ -3,13 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useEffect, useState } from 'react'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-  sites: unknown[]
-}
+import { Category } from '@/types/category'
 
 interface MobileMenuProps {
   categories: Category[]

@@ -2,26 +2,10 @@
 
 import { useEffect, useRef } from 'react'
 import { SiteCard } from './site-card'
-
-interface Site {
-  id: number
-  title: string
-  description: string | null
-  url: string
-  imageUrl: string | null
-  order: number
-  categoryId: number
-}
-
-interface Category {
-  id: number
-  name: string
-  order: number
-  sites: Site[]
-}
+import { CategoryWithSites } from '@/types/category'
 
 interface CategorySectionProps {
-  category: Category
+  category: CategoryWithSites
 }
 
 export function CategorySection({ category }: CategorySectionProps) {

@@ -6,12 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
-
-interface Category {
-  id: number
-  name: string
-  order: number
-}
+import { Category } from '@/types/category'
 
 interface CategoryDialogProps {
   open: boolean

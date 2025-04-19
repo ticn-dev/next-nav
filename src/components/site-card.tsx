@@ -6,15 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Globe } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
-
-interface Site {
-  id: number
-  title: string
-  description: string | null
-  url: string
-  imageUrl: string | null
-  categoryId: number
-}
+import { Site } from '@prisma/client'
 
 interface SiteCardProps {
   site: Site
