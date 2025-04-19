@@ -4,17 +4,25 @@ import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import type { Metadata } from 'next'
 import { getSystemSettings } from '@/lib/settings'
 import { AdminFooter } from '@/components/admin/admin-footer'
+import { readData } from '@/lib/uploads'
+import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSystemSettings('title', 'copyright')
   const title = settings.title || 'Next Nav'
+
+  const iconData = await readData(resolveIconPath(SystemIconId), true)
+  const iconType = (iconData?.metadata?.['content-type'] as string) || undefined
+  const iconExt = (iconData?.metadata?.['file-ext'] as string) || ''
+  const iconUrl = iconExt ? `/api/icon/this.${iconExt}` : undefined
+  const iconObj = iconUrl ? [{ url: iconUrl, type: iconType }] : undefined
 
   return {
     title: {
       template: `%s | ${title}`,
       default: title,
     },
-    icons: '/api/icon/this',
+    icons: iconObj,
     robots: {
       index: false,
       follow: false,

@@ -8,6 +8,8 @@ import type React from 'react'
 import { Metadata } from 'next'
 import { CategoryNav } from '@/components/category-nav'
 import { unstable_cache } from 'next/cache'
+import { readData } from '@/lib/uploads'
+import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 
 // This function enables ISR
 export const revalidate = 3600 // revalidate every hour
@@ -35,6 +37,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = settings.title || 'Next Nav'
   const metadata = await prisma.metaData.findMany()
 
+  const iconData = await readData(resolveIconPath(SystemIconId), true)
+  const iconType = (iconData?.metadata?.['content-type'] as string) || undefined
+  const iconExt = (iconData?.metadata?.['file-ext'] as string) || ''
+  const iconUrl = iconExt ? `/api/icon/this.${iconExt}` : undefined
+  const iconObj = iconUrl ? [{ url: iconUrl, type: iconType }] : undefined
+
   const meta: Record<string, string> = {}
   metadata.forEach((item) => {
     meta[item.key] = item.value
@@ -46,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: title,
     },
     other: meta,
-    icons: '/api/icon/this',
+    icons: iconObj,
   }
 }
 

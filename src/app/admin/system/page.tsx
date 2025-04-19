@@ -11,7 +11,6 @@ async function getSystemSettingsConfig() {
   return {
     title: settings.title || 'Next Nav',
     copyright: settings.copyright,
-    favicon: '/api/icon/this',
     metadata,
   }
 }

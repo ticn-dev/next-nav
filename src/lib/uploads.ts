@@ -59,16 +59,21 @@ export async function deleteData(targetPath: ResolvablePath) {
   }
 }
 
-export async function readData(targetPath: ResolvablePath) {
+export async function readData(targetPath: ResolvablePath, onlyMetadata: true): Promise<{ metadata: FileMetadata } | null>
+export async function readData(targetPath: ResolvablePath, onlyMetadata?: false): Promise<{ data: Uint8Array; metadata: FileMetadata } | null>
+export async function readData(targetPath: ResolvablePath, onlyMetadata = false): Promise<{ data?: Uint8Array; metadata: FileMetadata } | null> {
   const { metadataPath, filePath } = await resolvePath(targetPath)
   try {
     const fileExist = await isFileExist(metadataPath)
     if (!fileExist) {
       return null
     }
-    const data = await fs.readFile(filePath)
     const metadataStr = await fs.readFile(metadataPath, { encoding: 'utf-8' })
     const metadata = JSON.parse(metadataStr)
+    if (onlyMetadata) {
+      return { metadata }
+    }
+    const data = await fs.readFile(filePath)
     return { data, metadata }
   } catch (error) {
     console.error('Error reading file:', error)

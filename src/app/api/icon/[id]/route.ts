@@ -23,7 +23,7 @@ async function _responseIconData(id: string | number) {
 export async function GET(request: NextRequest, { params: _params }: { params: Promise<{ id: string }> }) {
   try {
     const params = await _params
-    if (params.id === 'this') {
+    if (params.id.startsWith('this.')) {
       return _responseIconData(SystemIconId)
     }
 
