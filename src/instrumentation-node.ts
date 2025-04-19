@@ -14,3 +14,19 @@ if (admins === null) {
     },
   })
 }
+
+const defaultCategory = await prisma.category.findFirst({
+  where: {
+    id: -1,
+  },
+})
+if (defaultCategory === null) {
+  console.log('No default category found, creating one..., default category name is default')
+  await prisma.category.create({
+    data: {
+      id: -1,
+      name: '默认分类',
+      order: 0,
+    },
+  })
+}

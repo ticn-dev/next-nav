@@ -9,6 +9,7 @@ import { Edit, Plus, RefreshCw, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CategoryDialog } from './category-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
+import { Badge } from '@/components/ui/badge'
 
 interface Category {
   id: number
@@ -176,6 +177,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
                   <TableCell className="hidden md:table-cell">{category.id}</TableCell>
                   <TableCell>
                     <span className="font-medium">{category.name}</span>
+                    {category.id === -1 && <Badge className="ml-2 bg-blue-400">默认</Badge>}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">{category.order}</TableCell>
                   <TableCell className="text-right">
@@ -183,7 +185,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
                       <Button variant="ghost" size="icon" onClick={() => handleEditCategory(category)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(category)}>
+                      <Button variant="ghost" size="icon" disabled={category.id === -1} onClick={() => handleDeleteCategory(category)}>
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
@@ -226,7 +228,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="删除分类"
-        description={`确定要删除分类 "${categoryToDelete?.name}" 吗？此操作不可撤销，且会删除该分类下的所有站点。`}
+        description={`确定要删除分类 "${categoryToDelete?.name}" 吗？此操作不可撤销，该分类下的所有站点会被移至默认分类。`}
         onConfirm={confirmDeleteCategory}
       />
     </div>

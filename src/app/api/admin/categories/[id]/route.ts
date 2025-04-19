@@ -65,6 +65,16 @@ export async function DELETE(request: NextRequest, { params: _params }: { params
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
     }
 
+    if (id === -1) {
+      return NextResponse.json({ error: 'Cannot delete default category' }, { status: 400 })
+    }
+
+    // 删除分类前,将该分类下的所有站点全部转移到默认分类
+    await prisma.site.updateMany({
+      where: { categoryId: id },
+      data: { categoryId: -1 },
+    })
+
     await prisma.category.delete({
       where: { id },
     })
