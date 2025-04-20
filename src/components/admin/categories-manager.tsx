@@ -342,7 +342,7 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <p className="text-muted-foreground text-sm">每页显示</p>
-          <select className="border-input bg-background h-8 w-[70px] rounded-md border px-2 text-sm" value={pageSize} onChange={(e) => setPageSize(Number.parseInt(e.target.value))}>
+          <select className="border-input bg-background h-8 w-[75px] rounded-md border px-2 text-sm" value={pageSize} onChange={(e) => setPageSize(Number.parseInt(e.target.value))}>
             <option value="10">10</option>
             <option value="20">20</option>
             <option value="50">50</option>

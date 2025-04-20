@@ -33,11 +33,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSystemSettings('copyright')
   return (
-    <div className="bg-background flex min-h-screen flex-col">
+    <div className="bg-background flex max-h-full min-h-screen flex-col">
       <AdminHeader />
-      <div className="flex min-h-0 flex-1">
+      <div className="flex h-full min-h-0 flex-1 items-stretch">
         <AdminSidebar className="hidden md:block" />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex flex-1 flex-col overflow-hidden p-6">
+          <div className="max-h-full overflow-auto">{children}</div>
+        </main>
       </div>
       <AdminFooter copyright={settings.copyright || 'Kairlec-NextNav'} />
     </div>

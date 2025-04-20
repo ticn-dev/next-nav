@@ -465,7 +465,7 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
         <div className="flex items-center gap-2">
           <p className="text-muted-foreground text-sm">每页显示</p>
           <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number.parseInt(value))}>
-            <SelectTrigger className="w-[70px]">
+            <SelectTrigger className="w-[75px]">
               <SelectValue placeholder={pageSize.toString()} />
             </SelectTrigger>
             <SelectContent>
