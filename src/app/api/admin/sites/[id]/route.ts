@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
     }
 
-    const { title, url, imageUrl, description, categoryId, order } = await request.json()
+    const { title, url, imageUrl, imageData, imageFilename, description, categoryId, order } = await request.json()
 
     if (!title || !url || !categoryId) {
       return NextResponse.json({ error: 'Title, URL, and category are required' }, { status: 400 })
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       data: {
         title,
         url,
-        imageUrl,
+        imageUrl: imageData ? '' : imageUrl,
         description,
         categoryId,
         order: order || 0,
@@ -60,24 +60,45 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
       },
     })
 
-    if (!imageUrl) {
+    if (imageData) {
       submitBgTask(async () => {
         try {
-          const icon = await fetchIcon(url)
-          if (icon) {
-            const iconPath = resolveIconPath(site.id)
-            const url = icon.iconUrl
-            const slashIdx = url.lastIndexOf('/')
-            const dotIdx = url.lastIndexOf('.')
-            const ext = dotIdx > slashIdx ? url.substring(dotIdx) : undefined
+          //parse base64 image data
+          const segments = imageData.split(',')
+          const base64Data = segments[1]
+          const buffer = Buffer.from(base64Data, 'base64')
+          const contentType = segments[0].split(':')[1].split(';')[0]
 
-            await saveData(iconPath, icon.iconData, { 'content-type': icon.contentType, 'file-ext': ext })
-          }
+          const ext = imageFilename?.split('.').pop() as string | undefined
+
+          const iconPath = resolveIconPath(site.id)
+
+          await saveData(iconPath, buffer, { 'content-type': contentType, 'file-ext': ext })
         } catch (error) {
-          console.error('Error fetching favicon:', error)
-          // Continue without favicon
+          console.error('Error saving image data:', error)
+          // Continue without image
         }
       })
+    } else {
+      if (!imageUrl) {
+        submitBgTask(async () => {
+          try {
+            const icon = await fetchIcon(url)
+            if (icon) {
+              const iconPath = resolveIconPath(site.id)
+              const url = icon.iconUrl
+              const slashIdx = url.lastIndexOf('/')
+              const dotIdx = url.lastIndexOf('.')
+              const ext = dotIdx > slashIdx ? url.substring(dotIdx) : undefined
+
+              await saveData(iconPath, icon.iconData, { 'content-type': icon.contentType, 'file-ext': ext })
+            }
+          } catch (error) {
+            console.error('Error fetching favicon:', error)
+            // Continue without favicon
+          }
+        })
+      }
     }
 
     revalidateTag('index')

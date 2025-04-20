@@ -7,9 +7,12 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Site } from '@/types/site'
 import { Category } from '@/types/category'
+import { Link, Loader2, Upload, X } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import Image from 'next/image'
 
 interface SiteDialogProps {
   open: boolean
@@ -24,6 +27,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [storedImageUrl, setStoredImageUrl] = useState('')
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [useNewCategory, setUseNewCategory] = useState(false)
@@ -31,6 +35,12 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [order, setOrder] = useState('0')
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Image upload states
+  const [imageTab, setImageTab] = useState<'url' | 'upload'>('url')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (site) {
@@ -40,6 +50,15 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setDescription(site.description || '')
       setCategoryId(site.categoryId.toString())
       setOrder(site.order.toString())
+      setStoredImageUrl(`/api/icon/${site.id}`)
+      // Set preview if site has an image
+      if (site.imageUrl) {
+        setPreviewUrl(site.imageUrl)
+        setImageTab('url')
+      } else {
+        setPreviewUrl(null)
+        setImageTab('url')
+      }
     } else {
       setTitle('')
       setUrl('')
@@ -47,9 +66,65 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setDescription('')
       setCategoryId(categories.length > 0 ? categories[0].id.toString() : '')
       setOrder('0')
+      setPreviewUrl(null)
+      setImageTab('url')
+      setStoredImageUrl('')
     }
+    setSelectedFile(null)
     setErrors({})
   }, [site, categories, open])
+
+  // Clean up object URLs when component unmounts or when a new file is selected
+  useEffect(() => {
+    return () => {
+      if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: '不支持的文件类型',
+        description: '请上传PNG、JPEG、GIF、WebP或SVG格式的图片',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: '文件过大',
+        description: '图片文件不能超过2MB',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // Create preview
+    if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    setSelectedFile(file)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
+
+  const clearImage = () => {
+    if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
+      URL.revokeObjectURL(previewUrl)
+    }
+    setSelectedFile(null)
+    setPreviewUrl(null)
+    setImageUrl('')
+  }
 
   const handleCategoryChange = (value: string) => {
     if (value === '#new') {
@@ -149,7 +224,24 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           throw new Error('Failed to create new category')
         }
       }
-
+      let imageData: string | undefined
+      let imageFilename: string | undefined
+      if (imageTab === 'upload' && selectedFile) {
+        // base64 encode the image
+        const reader = new FileReader()
+        reader.readAsDataURL(selectedFile)
+        reader.onload = () => {
+          imageData = reader.result as string
+        }
+        await new Promise((resolve) => {
+          reader.onloadend = () => {
+            resolve(null)
+          }
+        })
+        imageFilename = selectedFile.name
+        console.log('imageData', imageData)
+        console.log('imageFilename', imageFilename)
+      }
       const method = site ? 'PUT' : 'POST'
       const endpoint = site ? `/api/admin/sites/${site.id}` : '/api/admin/sites'
 
@@ -162,6 +254,8 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           title,
           url,
           imageUrl: imageUrl || null,
+          imageData,
+          imageFilename,
           description: description || null,
           categoryId: Number.parseInt(categoryIdStr),
           order: Number.parseInt(order),
@@ -225,21 +319,68 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               {errors.url && <p className="text-destructive text-xs">{errors.url}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="imageUrl" className="text-right">
-              图标URL
-            </Label>
-            <div className="col-span-3 space-y-1">
-              <Input
-                id="imageUrl"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://example.com/favicon.ico"
-                className={errors.imageUrl ? 'border-destructive' : ''}
-              />
-              {errors.imageUrl && <p className="text-destructive text-xs">{errors.imageUrl}</p>}
+
+          {/* Image section with tabs */}
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label className="pt-2 text-right">图标</Label>
+            <div className="col-span-3 space-y-3">
+              <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'upload')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="url" className="flex items-center gap-1">
+                    <Link className="h-4 w-4" />
+                    <span>URL</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="flex items-center gap-1">
+                    <Upload className="h-4 w-4" />
+                    <span>上传</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="url" className="space-y-3">
+                  <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/favicon.ico" />
+                </TabsContent>
+
+                <TabsContent value="upload" className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full" disabled={isSaving}>
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          上传中...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          选择图片
+                        </>
+                      )}
+                    </Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/png,image/jpeg,image/gif,image/webp,image/x-icon,image/vnd.microsoft.icon"
+                      onChange={handleFileChange}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <p className="text-muted-foreground text-xs">支持PNG、JPEG、GIF、WebP和ICO格式，最大2MB</p>
+                </TabsContent>
+              </Tabs>
+
+              {/* Image preview */}
+              {(previewUrl || imageUrl || storedImageUrl) && (
+                <div className="bg-muted/30 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border">
+                  <Image src={previewUrl || imageUrl || storedImageUrl} alt="图标预览" fill={true} className="object-contain" />
+                  <Button type="button" variant="ghost" size="icon" className="bg-background/80 hover:bg-background absolute top-1 right-1 h-6 w-6 rounded-full" onClick={clearImage}>
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">清除图片</span>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">
               分类 *
@@ -293,11 +434,18 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             关闭
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? '保存中...' : '保存'}
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                保存中...
+              </>
+            ) : (
+              '保存'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

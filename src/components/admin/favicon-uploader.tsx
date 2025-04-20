@@ -25,7 +25,7 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
     if (!file) return
 
     // Validate file type
-    const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon']
+    const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon']
     if (!validTypes.includes(file.type)) {
       toast({
         title: '不支持的文件类型',
@@ -101,7 +101,7 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
             </div>
           )}
         </div>
-        <input type="file" ref={fileInputRef} className="hidden" accept="image/png,image/jpeg,image/gif,image/x-icon,image/vnd.microsoft.icon" onChange={handleFileChange} />
+        <input type="file" ref={fileInputRef} className="hidden" accept="image/png,image/jpeg,image/gif,image/webp,image/x-icon,image/vnd.microsoft.icon" onChange={handleFileChange} />
         <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full">
           <Upload className="mr-2 h-4 w-4" />
           {isUploading ? '上传中...' : '上传图标'}
