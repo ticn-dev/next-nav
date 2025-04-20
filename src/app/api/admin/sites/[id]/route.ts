@@ -89,6 +89,32 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
   }
 }
 
+export async function PATCH(request: NextRequest, { params: _params }: { params: Promise<{ id: string }> }) {
+  try {
+    const params = await _params
+    const id = Number.parseInt(params.id)
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
+    const data = await request.json()
+
+    // Update only the provided fields
+    const site = await prisma.site.update({
+      where: { id },
+      data,
+      include: {
+        category: true,
+      },
+    })
+
+    return NextResponse.json(site)
+  } catch (error) {
+    console.error('Error patching site:', error)
+    return NextResponse.json({ error: 'Failed to update site' }, { status: 500 })
+  }
+}
+
 export async function DELETE(request: NextRequest, { params: _params }: { params: Promise<{ id: string }> }) {
   try {
     const params = await _params

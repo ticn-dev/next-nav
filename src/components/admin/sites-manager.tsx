@@ -2,17 +2,20 @@
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from '@/components/ui/use-toast'
-import { Edit, Globe, Plus, RefreshCw, Trash } from 'lucide-react'
+import { Edit, Globe, Loader2, MoveHorizontal, Plus, RefreshCw, Trash, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SiteDialog } from './site-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import Image from 'next/image'
 import { Site, SiteWithCategory } from '@/types/site'
 import { Category } from '@/types/category'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 interface SitesManagerProps {
   initialSites: SiteWithCategory[]
@@ -26,6 +29,7 @@ interface LoadableSiteWithCategory extends SiteWithCategory {
 export function SitesManager({ initialSites, initialCategories }: SitesManagerProps) {
   const [sites, setSites] = useState<LoadableSiteWithCategory[]>(initialSites)
   const [filteredSites, setFilteredSites] = useState<LoadableSiteWithCategory[]>(initialSites)
+  const [paginatedSites, setPaginatedSites] = useState<LoadableSiteWithCategory[]>([])
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -37,6 +41,24 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
   const [editingSite, setEditingSite] = useState<LoadableSiteWithCategory | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [siteToDelete, setSiteToDelete] = useState<LoadableSiteWithCategory | null>(null)
+
+  // Batch operation states
+  const [selectedChanged, setSelectedChanged] = useState<boolean | null>(null)
+  const [selectedSites, setSelectedSites] = useState<Set<number>>(new Set())
+  const [isAllSelected, setIsAllSelected] = useState(false)
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false)
+  const [batchMoveDialogOpen, setBatchMoveDialogOpen] = useState(false)
+  const [targetCategoryId, setTargetCategoryId] = useState<string>('')
+  const [isBatchProcessing, setIsBatchProcessing] = useState(false)
+
+  useEffect(() => {
+    if (selectedChanged === null) {
+      setSelectedChanged(selectedSites.size > 0)
+    } else {
+      setSelectedChanged(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSites])
 
   // Filter and paginate sites
   useEffect(() => {
@@ -60,7 +82,143 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
     setCurrentPage(1)
   }, [sites, categoryFilter, searchTerm, pageSize])
 
-  const paginatedSites = filteredSites.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  useEffect(() => {
+    setPaginatedSites(filteredSites.slice((currentPage - 1) * pageSize, currentPage * pageSize))
+  }, [filteredSites, currentPage, pageSize])
+
+  useEffect(() => {
+    // Update isAllSelected based on whether all filtered items are selected
+    if (selectedSites.size > 0) {
+      const allFilteredSelected = paginatedSites.every((site) => selectedSites.has(site.id))
+      setIsAllSelected(allFilteredSelected && paginatedSites.length > 0)
+    } else {
+      setIsAllSelected(false)
+    }
+  }, [paginatedSites, selectedSites])
+
+  // Handle "select all" checkbox
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      // If all items on current page are selected, deselect them
+      const newSelected = new Set(selectedSites)
+      paginatedSites.forEach((site) => newSelected.delete(site.id))
+      setSelectedSites(newSelected)
+      setIsAllSelected(false)
+    } else {
+      // Select all items on current page
+      const newSelected = new Set(selectedSites)
+      paginatedSites.forEach((site) => newSelected.add(site.id))
+      setSelectedSites(newSelected)
+      setIsAllSelected(true)
+    }
+  }
+
+  // Handle individual checkbox selection
+  const handleSelectSite = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedSites)
+    if (checked) {
+      newSelected.add(id)
+    } else {
+      newSelected.delete(id)
+    }
+    setSelectedSites(newSelected)
+
+    // Update "select all" state
+    setIsAllSelected(newSelected.size === paginatedSites.length && newSelected.size > 0)
+  }
+
+  // Batch delete sites
+  const confirmBatchDelete = async () => {
+    if (selectedSites.size === 0) return
+
+    setIsBatchProcessing(true)
+    try {
+      const selectedArray = Array.from(selectedSites)
+      const results = await Promise.allSettled(selectedArray.map((id) => fetch(`/api/sites/${id}`, { method: 'DELETE' })))
+
+      // Count successful deletions
+      const successCount = results.filter((r) => r.status === 'fulfilled').length
+
+      // Update sites list
+      setSites(sites.filter((site) => !selectedSites.has(site.id)))
+      setSelectedSites(new Set())
+      setIsAllSelected(false)
+
+      toast({
+        title: '批量删除成功',
+        description: `已删除 ${successCount} 个站点`,
+      })
+    } catch (error) {
+      console.error('Error deleting sites:', error)
+      toast({
+        title: '批量删除失败',
+        description: '部分或全部站点删除失败，请稍后重试',
+        variant: 'destructive',
+      })
+    } finally {
+      setBatchDeleteDialogOpen(false)
+      setIsBatchProcessing(false)
+    }
+  }
+
+  // Batch move sites to a different category
+  const confirmBatchMove = async () => {
+    if (selectedSites.size === 0 || !targetCategoryId) return
+
+    setIsBatchProcessing(true)
+    try {
+      const selectedArray = Array.from(selectedSites)
+      const categoryId = Number.parseInt(targetCategoryId)
+      const results = await Promise.allSettled(
+        selectedArray.map((id) =>
+          fetch(`/api/sites/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryId }),
+          }),
+        ),
+      )
+
+      // Count successful moves
+      const successCount = results.filter((r) => r.status === 'fulfilled').length
+
+      // Update sites list
+      const targetCategory = categories.find((c) => c.id === categoryId)
+      if (targetCategory) {
+        setSites(
+          sites.map((site) => {
+            if (selectedSites.has(site.id)) {
+              return {
+                ...site,
+                categoryId,
+                category: targetCategory,
+              }
+            }
+            return site
+          }),
+        )
+      }
+
+      setSelectedSites(new Set())
+      setIsAllSelected(false)
+
+      toast({
+        title: '批量移动成功',
+        description: `已移动 ${successCount} 个站点到新分类`,
+      })
+    } catch (error) {
+      console.error('Error moving sites:', error)
+      toast({
+        title: '批量移动失败',
+        description: '部分或全部站点移动失败，请稍后重试',
+        variant: 'destructive',
+      })
+    } finally {
+      setBatchMoveDialogOpen(false)
+      setTargetCategoryId('')
+      setIsBatchProcessing(false)
+    }
+  }
 
   const refreshSites = async () => {
     setIsLoading(true)
@@ -161,6 +319,11 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
     )
   }
 
+  // Clear all selections
+  const clearSelections = () => {
+    setSelectedSites(new Set())
+    setIsAllSelected(false)
+  }
   return (
     <div className="space-y-4">
       <Card className="p-4">
@@ -193,10 +356,52 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
         </div>
       </Card>
 
+      {/* Batch operations bar - only visible when items are selected */}
+      <Card className={cn('bg-muted/50 px-4', selectedChanged === true ? (selectedSites.size > 0 ? 'batch-select-bar-fadein' : 'batch-select-bar-fadeout') : 'hidden')}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">已选择 {selectedSites.size} 项</span>
+            {selectedSites.size > 0 && selectedSites.size < filteredSites.length && (
+              <Button
+                variant="link"
+                size="sm"
+                className="text-primary h-auto p-0"
+                onClick={() => {
+                  // Select all filtered items
+                  const newSelected = new Set<number>()
+                  filteredSites.forEach((site) => newSelected.add(site.id))
+                  setSelectedSites(newSelected)
+                  setIsAllSelected(true)
+                }}
+              >
+                选择所有 {filteredSites.length} 项
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={clearSelections}>
+              <X className="mr-1 h-4 w-4" />
+              清除
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBatchMoveDialogOpen(true)} disabled={selectedSites.size === 0}>
+              <MoveHorizontal className="mr-1 h-4 w-4" />
+              批量移动
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setBatchDeleteDialogOpen(true)} disabled={selectedSites.size === 0}>
+              <Trash className="mr-1 h-4 w-4" />
+              批量删除
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]">
+                <Checkbox checked={isAllSelected} onCheckedChange={handleSelectAll} aria-label="Select all sites" />
+              </TableHead>
               <TableHead className="hidden w-[80px] md:table-cell">ID</TableHead>
               <TableHead>名称</TableHead>
               <TableHead className="hidden md:table-cell">分类</TableHead>
@@ -207,13 +412,16 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
           <TableBody>
             {paginatedSites.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   没有找到站点
                 </TableCell>
               </TableRow>
             ) : (
               paginatedSites.map((site) => (
                 <TableRow key={site.id}>
+                  <TableCell>
+                    <Checkbox checked={selectedSites.has(site.id)} onCheckedChange={(checked) => handleSelectSite(site.id, !!checked)} aria-label={`Select site ${site.title}`} />
+                  </TableCell>
                   <TableCell className="hidden md:table-cell">{site.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -292,6 +500,57 @@ export function SitesManager({ initialSites, initialCategories }: SitesManagerPr
         description={`确定要删除站点 "${siteToDelete?.title}" 吗？此操作不可撤销。`}
         onConfirm={confirmDeleteSite}
       />
+
+      {/* Batch Delete Dialog */}
+      <DeleteConfirmDialog
+        open={batchDeleteDialogOpen}
+        onOpenChange={setBatchDeleteDialogOpen}
+        title="批量删除站点"
+        description={`确定要删除选中的 ${selectedSites.size} 个站点吗？此操作不可撤销。`}
+        onConfirm={confirmBatchDelete}
+        isLoading={isBatchProcessing}
+      />
+
+      {/* Batch Move Dialog */}
+      <Dialog open={batchMoveDialogOpen} onOpenChange={setBatchMoveDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>批量移动站点</DialogTitle>
+            <DialogDescription>将选中的 {selectedSites.size} 个站点移动到新的分类</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Select value={targetCategoryId} onValueChange={setTargetCategoryId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="选择目标分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBatchMoveDialogOpen(false)} disabled={isBatchProcessing}>
+              取消
+            </Button>
+            <Button onClick={confirmBatchMove} disabled={!targetCategoryId || isBatchProcessing}>
+              {isBatchProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  处理中...
+                </>
+              ) : (
+                '确认移动'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

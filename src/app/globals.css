@@ -223,3 +223,39 @@ main {
     animation: collapseSearch 0.3s ease-out forwards;
     overflow: hidden;
 }
+
+@keyframes animate-batch-select-bar-fadein {
+    from {
+        max-height: 0;
+        padding-block: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: calc(4rem + 2px);
+        padding-block: 1rem;
+        opacity: 1;
+    }
+}
+
+@keyframes animate-batch-select-bar-fadeout {
+    from {
+        max-height: calc(4rem + 2px);
+        padding-block: 1rem;
+        opacity: 1;
+    }
+    to {
+        max-height: 0;
+        padding-block: 0;
+        opacity: 0;
+    }
+}
+
+.batch-select-bar-fadein {
+    animation: animate-batch-select-bar-fadein 0.3s ease-in forwards;
+    overflow: hidden;
+}
+
+.batch-select-bar-fadeout {
+    animation: animate-batch-select-bar-fadeout 0.3s ease-out forwards;
+    overflow: hidden;
+}
