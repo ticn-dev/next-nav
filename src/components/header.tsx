@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSearch } from './search-provider'
 import { Input } from './ui/input'
+import { twMerge } from 'tailwind-merge'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -90,23 +91,21 @@ export default function Header() {
         </div>
 
         {/* Mobile Expanded Search */}
-        {isSearchExpanded && (
-          <div className="bg-background border-t p-2 md:hidden">
-            <div className="relative">
-              <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
-              <Input type="text" placeholder="搜索站点..." className="w-full pr-10 pl-8" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
-              <div
-                className="absolute top-0 right-0 flex h-full cursor-pointer items-center pr-3"
-                onClick={() => {
-                  setSearchQuery('')
-                  setIsSearchExpanded(false)
-                }}
-              >
-                <X className="h-4 w-4" />
-              </div>
+        <div className={twMerge('bg-background border-t', isSearchExpanded ? 'mobile-search-expanded' : 'mobile-search-collapsed', 'md:hidden')}>
+          <div className="relative">
+            <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            <Input type="text" placeholder="搜索站点..." className="w-full pr-10 pl-8" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
+            <div
+              className="absolute top-0 right-0 flex h-full cursor-pointer items-center pr-3"
+              onClick={() => {
+                setSearchQuery('')
+                setIsSearchExpanded(false)
+              }}
+            >
+              <X className="h-4 w-4" />
             </div>
           </div>
-        )}
+        </div>
       </header>
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} onAdminClick={handleAdminNavigation} />
     </>
