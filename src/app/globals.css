@@ -245,3 +245,29 @@ body {
     animation: animate-batch-select-bar-fadeout 0.3s ease-out forwards;
     overflow: hidden;
 }
+
+@keyframes borderSlide {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+.group:hover .animate-border {
+    animation: borderSlide 0.5s ease forwards;
+}
+
+.nav-card {
+    transition: all 0.3s ease;
+}
+
+.nav-card:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .nav-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
