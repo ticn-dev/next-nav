@@ -3,11 +3,11 @@
 import { cn } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/button'
-import { Category } from '@/types/category'
+import { CategoryWithSites } from '@/types/category'
 
 interface CategoryNavProps {
   className?: string
-  categories: Category[]
+  categories: CategoryWithSites[]
 }
 
 export function CategoryNav({ className, categories }: CategoryNavProps) {
@@ -40,6 +40,17 @@ export function CategoryNav({ className, categories }: CategoryNavProps) {
     }
   }, [])
 
+  useEffect(() => {
+    // Update active category if current one is not in filtered list
+    if (categories.length > 0) {
+      if (!categories.some((c) => c.id === activeCategory)) {
+        setActiveCategory(categories[0].id)
+      }
+    } else {
+      setActiveCategory(null)
+    }
+  }, [activeCategory, categories])
+
   // Scroll the active category into view when it changes
   useEffect(() => {
     if (activeCategory && navRef.current) {
@@ -69,7 +80,16 @@ export function CategoryNav({ className, categories }: CategoryNavProps) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
   }
-
+  if (categories.length === 0) {
+    return (
+      <aside className={cn('bg-background w-64 shrink-0 border-r p-4', className)}>
+        <div className="bg-background sticky top-0 pb-2">
+          <h2 className="mb-4 text-lg font-semibold">分类导航</h2>
+        </div>
+        <div className="text-muted-foreground text-sm">没有可显示的分类</div>
+      </aside>
+    )
+  }
   return (
     <aside className={cn('bg-background w-64 shrink-0 border-r p-4', className)}>
       <div className="bg-background sticky top-0">

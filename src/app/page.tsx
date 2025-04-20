@@ -1,15 +1,13 @@
-import { CategorySection } from '@/components/category-section'
 import { Footer } from '@/components/footer'
-import { MobileMenu } from '@/components/mobile-menu'
 import { prisma } from '@/lib/prisma'
 import { getSystemSettings } from '@/lib/settings'
 import Header from '@/components/header'
 import type React from 'react'
 import { Metadata } from 'next'
-import { CategoryNav } from '@/components/category-nav'
 import { unstable_cache } from 'next/cache'
 import { readData } from '@/lib/uploads'
 import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
+import CategoryFilterableRenderer from '@/components/category-filterable-renderer'
 
 // This function enables ISR
 export const revalidate = 3600 // revalidate every hour
@@ -67,21 +65,7 @@ export default async function Home() {
     <>
       <Header />
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <div className="px-4 py-2 md:hidden">
-          <MobileMenu categories={categories} />
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* Fixed sidebar for categories on desktop */}
-          <CategoryNav categories={categories} className="hidden md:block" />
-
-          {/* Scrollable content area for site listings */}
-          <div className="flex-1 space-y-8 overflow-y-auto px-4 pb-6">
-            {categories.map((category) => (
-              <CategorySection key={category.id} category={category} />
-            ))}
-          </div>
-        </div>
+        <CategoryFilterableRenderer initialCategories={categories}></CategoryFilterableRenderer>
         <Footer copyright={copyright} />
       </div>
     </>
