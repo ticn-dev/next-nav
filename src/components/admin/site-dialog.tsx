@@ -13,6 +13,7 @@ import { Category } from '@/types/category'
 import { Link, Loader2, Upload, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
+import NumberInput from '@/components/number-input'
 
 interface SiteDialogProps {
   open: boolean
@@ -32,12 +33,12 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [categoryId, setCategoryId] = useState('')
   const [useNewCategory, setUseNewCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
-  const [order, setOrder] = useState('0')
+  const [order, setOrder] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Image upload states
-  const [imageTab, setImageTab] = useState<'url' | 'upload'>('url')
+  const [imageTab, setImageTab] = useState<'url' | 'upload'>('upload')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -49,7 +50,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setImageUrl(site.imageUrl || '')
       setDescription(site.description || '')
       setCategoryId(site.categoryId.toString())
-      setOrder(site.order.toString())
+      setOrder(site.order)
       setStoredImageUrl(`/api/icon/${site.id}`)
       // Set preview if site has an image
       if (site.imageUrl) {
@@ -57,7 +58,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
         setImageTab('url')
       } else {
         setPreviewUrl(null)
-        setImageTab('url')
+        setImageTab('upload')
       }
     } else {
       setTitle('')
@@ -65,9 +66,9 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setImageUrl('')
       setDescription('')
       setCategoryId(categories.length > 0 ? categories[0].id.toString() : '')
-      setOrder('0')
+      setOrder(0)
       setPreviewUrl(null)
-      setImageTab('url')
+      setImageTab('upload')
       setStoredImageUrl('')
     }
     setSelectedFile(null)
@@ -178,13 +179,8 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       }
     }
 
-    if (!order.trim()) {
-      newErrors.order = '排序不能为空'
-    } else {
-      const orderNum = Number.parseInt(order)
-      if (isNaN(orderNum) || orderNum < -99999 || orderNum > 99999) {
-        newErrors.order = '排序必须是-99999到99999之间的数字'
-      }
+    if (isNaN(order) || order < -99999 || order > 99999) {
+      newErrors.order = '排序必须是-99999到99999之间的数字'
     }
 
     if (description && description.length > 100) {
@@ -258,7 +254,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           imageFilename,
           description: description || null,
           categoryId: Number.parseInt(categoryIdStr),
-          order: Number.parseInt(order),
+          order,
         }),
       })
 
@@ -306,7 +302,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               名称 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="站点名称" className={errors.title ? 'border-destructive' : ''} />
+              <Input id="title" maxLength={20} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="站点名称" className={errors.title ? 'border-destructive' : ''} />
               {errors.title && <p className="text-destructive text-xs">{errors.title}</p>}
             </div>
           </div>
@@ -326,13 +322,13 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
             <div className="col-span-3 space-y-3">
               <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'upload')} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="url" className="flex items-center gap-1">
-                    <Link className="h-4 w-4" />
-                    <span>URL</span>
-                  </TabsTrigger>
                   <TabsTrigger value="upload" className="flex items-center gap-1">
                     <Upload className="h-4 w-4" />
                     <span>上传</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="url" className="flex items-center gap-1">
+                    <Link className="h-4 w-4" />
+                    <span>URL</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -390,6 +386,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
                 <Input
                   id="newCategory"
                   value={newCategoryName}
+                  maxLength={20}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="新分类名称"
                   className={errors.categoryId ? 'border-destructive' : ''}
@@ -419,7 +416,16 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               排序 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="order" value={order} onChange={(e) => setOrder(e.target.value)} placeholder="0" className={errors.order ? 'border-destructive' : ''} />
+              <NumberInput
+                id="order"
+                min={-99999}
+                max={99999}
+                value={order}
+                onValueChange={(v) => setOrder(v ?? 0)}
+                defaultValue={0}
+                placeholder="0"
+                className={errors.order ? 'border-destructive' : ''}
+              ></NumberInput>
               {errors.order && <p className="text-destructive text-xs">{errors.order}</p>}
             </div>
           </div>
@@ -428,7 +434,14 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               描述
             </Label>
             <div className="col-span-3 space-y-1">
-              <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="站点描述" className={errors.description ? 'border-destructive' : ''} />
+              <Textarea
+                id="description"
+                maxLength={100}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="站点描述"
+                className={errors.description ? 'border-destructive' : ''}
+              />
               {errors.description && <p className="text-destructive text-xs">{errors.description}</p>}
             </div>
           </div>

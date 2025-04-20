@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
 import { Category } from '@/types/category'
+import NumberInput from '@/components/number-input'
 
 interface CategoryDialogProps {
   open: boolean
@@ -17,17 +18,17 @@ interface CategoryDialogProps {
 
 export function CategoryDialog({ open, onOpenChange, category, onSave }: CategoryDialogProps) {
   const [name, setName] = useState('')
-  const [order, setOrder] = useState('0')
+  const [order, setOrder] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (category) {
       setName(category.name)
-      setOrder(category.order.toString())
+      setOrder(category.order)
     } else {
       setName('')
-      setOrder('0')
+      setOrder(0)
     }
     setErrors({})
   }, [category, open])
@@ -39,13 +40,8 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
       newErrors.name = '名称不能为空'
     }
 
-    if (!order.trim()) {
-      newErrors.order = '排序不能为空'
-    } else {
-      const orderNum = Number.parseInt(order)
-      if (isNaN(orderNum) || orderNum < -99999 || orderNum > 99999) {
-        newErrors.order = '排序必须是-99999到99999之间的数字'
-      }
+    if (isNaN(order) || order < -99999 || order > 99999) {
+      newErrors.order = '排序必须是-99999到99999之间的数字'
     }
 
     setErrors(newErrors)
@@ -67,7 +63,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
         },
         body: JSON.stringify({
           name,
-          order: Number.parseInt(order),
+          order,
         }),
       })
 
@@ -115,7 +111,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
               名称 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="分类名称" className={errors.name ? 'border-destructive' : ''} />
+              <Input id="name" maxLength={20} value={name} onChange={(e) => setName(e.target.value)} placeholder="分类名称" className={errors.name ? 'border-destructive' : ''} />
               {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
             </div>
           </div>
@@ -124,7 +120,16 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
               排序 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="order" value={order} onChange={(e) => setOrder(e.target.value)} placeholder="0" className={errors.order ? 'border-destructive' : ''} />
+              <NumberInput
+                id="order"
+                min={-99999}
+                max={99999}
+                value={order}
+                onValueChange={(v) => setOrder(v ?? 0)}
+                defaultValue={0}
+                placeholder="0"
+                className={errors.order ? 'border-destructive' : ''}
+              ></NumberInput>
               {errors.order && <p className="text-destructive text-xs">{errors.order}</p>}
             </div>
           </div>
