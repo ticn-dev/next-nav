@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
 import { useEffect, useRef, useState } from 'react'
-import { Site } from '@/types/site'
+import { ImageMode, Site } from '@/types/site'
 import { Category } from '@/types/category'
-import { Link, Loader2, Upload, X } from 'lucide-react'
+import { ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
 import NumberInput from '@/components/number-input'
+import { useDebouncedCallback } from 'use-debounce'
+import FaviconImage from '@/components/favicon-image'
 
 interface SiteDialogProps {
   open: boolean
@@ -28,6 +30,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [previewSetImageUrl, setPreviewSetImageUrl] = useState('')
   const [storedImageUrl, setStoredImageUrl] = useState('')
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState('')
@@ -38,9 +41,9 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Image upload states
-  const [imageTab, setImageTab] = useState<'url' | 'upload'>('upload')
+  const [imageTab, setImageTab] = useState<ImageMode>('auto-fetch')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUploadUrl, setPreviewUploadUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -52,13 +55,12 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setCategoryId(site.categoryId.toString())
       setOrder(site.order)
       setStoredImageUrl(`/api/icon/${site.id}`)
+      setImageTab(site.imageMode)
       // Set preview if site has an image
       if (site.imageUrl) {
-        setPreviewUrl(site.imageUrl)
-        setImageTab('url')
+        setPreviewUploadUrl(site.imageUrl)
       } else {
-        setPreviewUrl(null)
-        setImageTab('upload')
+        setPreviewUploadUrl(null)
       }
     } else {
       setTitle('')
@@ -67,22 +69,37 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setDescription('')
       setCategoryId(categories.length > 0 ? categories[0].id.toString() : '')
       setOrder(0)
-      setPreviewUrl(null)
-      setImageTab('upload')
+      setPreviewUploadUrl(null)
+      setImageTab('auto-fetch')
       setStoredImageUrl('')
     }
     setSelectedFile(null)
     setErrors({})
   }, [site, categories, open])
 
+  const setPreviewSetImageUrlDebounced = useDebouncedCallback((imageUrl) => {
+    setPreviewSetImageUrl(imageUrl)
+  }, 200)
+
+  useEffect(() => {
+    setPreviewSetImageUrlDebounced(imageUrl)
+  }, [imageUrl, setPreviewSetImageUrlDebounced])
+
+  useEffect(() => {
+    const newError = structuredClone(errors)
+    delete newError['imageUrl']
+    setErrors(newError)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageTab])
+
   // Clean up object URLs when component unmounts or when a new file is selected
   useEffect(() => {
     return () => {
-      if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
-        URL.revokeObjectURL(previewUrl)
+      if (previewUploadUrl && !previewUploadUrl.startsWith('http') && !previewUploadUrl.startsWith('/')) {
+        URL.revokeObjectURL(previewUploadUrl)
       }
     }
-  }, [previewUrl])
+  }, [previewUploadUrl])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -110,20 +127,20 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
     }
 
     // Create preview
-    if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
-      URL.revokeObjectURL(previewUrl)
+    if (previewUploadUrl && !previewUploadUrl.startsWith('http') && !previewUploadUrl.startsWith('/')) {
+      URL.revokeObjectURL(previewUploadUrl)
     }
 
     setSelectedFile(file)
-    setPreviewUrl(URL.createObjectURL(file))
+    setPreviewUploadUrl(URL.createObjectURL(file))
   }
 
   const clearImage = () => {
-    if (previewUrl && !previewUrl.startsWith('http') && !previewUrl.startsWith('/')) {
-      URL.revokeObjectURL(previewUrl)
+    if (previewUploadUrl && !previewUploadUrl.startsWith('http') && !previewUploadUrl.startsWith('/')) {
+      URL.revokeObjectURL(previewUploadUrl)
     }
     setSelectedFile(null)
-    setPreviewUrl(null)
+    setPreviewUploadUrl(null)
     setImageUrl('')
   }
 
@@ -156,14 +173,22 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       }
     }
 
-    if (imageUrl) {
+    if (imageTab === 'url') {
+      const url = imageUrl.trim()
+      if (!url) {
+        newErrors.imageUrl = '图标URL不能为空'
+      }
       try {
-        const iu = new URL(imageUrl)
+        const iu = new URL(url)
         if (!['http:', 'https:'].includes(iu.protocol)) {
           newErrors.imageUrl = '图标URL只支持http和https协议'
         }
       } catch {
         newErrors.imageUrl = '图标URL格式不正确'
+      }
+    } else if (imageTab === 'upload') {
+      if (!site && !selectedFile) {
+        newErrors.imageUrl = '请上传图标'
       }
     }
 
@@ -220,42 +245,29 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           throw new Error('Failed to create new category')
         }
       }
-      let imageData: string | undefined
-      let imageFilename: string | undefined
-      if (imageTab === 'upload' && selectedFile) {
-        // base64 encode the image
-        const reader = new FileReader()
-        reader.readAsDataURL(selectedFile)
-        reader.onload = () => {
-          imageData = reader.result as string
-        }
-        await new Promise((resolve) => {
-          reader.onloadend = () => {
-            resolve(null)
-          }
-        })
-        imageFilename = selectedFile.name
-        console.log('imageData', imageData)
-        console.log('imageFilename', imageFilename)
-      }
+
       const method = site ? 'PUT' : 'POST'
       const endpoint = site ? `/api/admin/sites/${site.id}` : '/api/admin/sites'
 
+      const request = JSON.stringify({
+        title,
+        url,
+        imageUrl: imageUrl || null,
+        imageMode: imageTab,
+        description: description || null,
+        categoryId: Number.parseInt(categoryIdStr),
+        order,
+      })
+
+      const formData = new FormData()
+      formData.append('request', request)
+      if (imageTab === 'upload' && selectedFile) {
+        formData.append('imageData', selectedFile)
+      }
+
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          url,
-          imageUrl: imageUrl || null,
-          imageData,
-          imageFilename,
-          description: description || null,
-          categoryId: Number.parseInt(categoryIdStr),
-          order,
-        }),
+        body: formData,
       })
 
       if (response.ok) {
@@ -320,8 +332,12 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           <div className="grid grid-cols-4 items-start gap-4">
             <Label className="pt-2 text-right">图标</Label>
             <div className="col-span-3 space-y-3">
-              <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'upload')} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+              <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'auto-fetch' | 'upload')} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="auto-fetch" className="flex items-center gap-1">
+                    <ImageDown className="h-4 w-4" />
+                    <span>自动获取</span>
+                  </TabsTrigger>
                   <TabsTrigger value="upload" className="flex items-center gap-1">
                     <Upload className="h-4 w-4" />
                     <span>上传</span>
@@ -334,6 +350,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
 
                 <TabsContent value="url" className="space-y-3">
                   <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/favicon.ico" />
+                  {errors.imageUrl && <p className="text-destructive text-xs">{errors.imageUrl}</p>}
                 </TabsContent>
 
                 <TabsContent value="upload" className="space-y-3">
@@ -361,19 +378,34 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
                     />
                   </div>
                   <p className="text-muted-foreground text-xs">支持PNG、JPEG、GIF、WebP和ICO格式，最大2MB</p>
+                  {errors.imageUrl && <p className="text-destructive text-xs">{errors.imageUrl}</p>}
                 </TabsContent>
               </Tabs>
 
               {/* Image preview */}
-              {(previewUrl || imageUrl || storedImageUrl) && (
+              {imageTab === 'url' && (
                 <div className="bg-muted/30 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border">
-                  <Image src={previewUrl || imageUrl || storedImageUrl} alt="图标预览" fill={true} className="object-contain" />
+                  <FaviconImage alt="图标预览" src={previewSetImageUrl || storedImageUrl} fill={true} className="object-contain" />
+                </div>
+              )}
+              {imageTab === 'upload' && (
+                <div className="bg-muted/30 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border">
+                  <Image src={previewUploadUrl || storedImageUrl} alt="图标预览" fill={true} className="object-contain" />
                   <Button type="button" variant="ghost" size="icon" className="bg-background/80 hover:bg-background absolute top-1 right-1 h-6 w-6 rounded-full" onClick={clearImage}>
                     <X className="h-4 w-4" />
                     <span className="sr-only">清除图片</span>
                   </Button>
                 </div>
               )}
+              {/*{(previewUploadUrl || imageUrl || storedImageUrl) && (*/}
+              {/*  <div className="bg-muted/30 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border">*/}
+              {/*    <Image src={previewUploadUrl || imageUrl || storedImageUrl} alt="图标预览" fill={true} className="object-contain" />*/}
+              {/*    <Button type="button" variant="ghost" size="icon" className="bg-background/80 hover:bg-background absolute top-1 right-1 h-6 w-6 rounded-full" onClick={clearImage}>*/}
+              {/*      <X className="h-4 w-4" />*/}
+              {/*      <span className="sr-only">清除图片</span>*/}
+              {/*    </Button>*/}
+              {/*  </div>*/}
+              {/*)}*/}
             </div>
           </div>
 
