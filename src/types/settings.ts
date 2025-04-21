@@ -1,4 +1,4 @@
-import type { MetaData } from "./metadata"
+import type { MetaData } from './metadata'
 
 export interface SystemSettingsRecord {
   title: string
