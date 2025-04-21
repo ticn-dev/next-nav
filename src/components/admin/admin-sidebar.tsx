@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { usePathname, useRouter } from 'next/navigation'
-import { Database, Globe, Lock, Settings } from 'lucide-react'
+import { Database, Globe, Layers2, Lock, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet'
 
@@ -34,6 +34,11 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       name: '系统设置',
       path: '/admin/system',
       icon: <Settings className="mr-2 h-4 w-4" />,
+    },
+    {
+      name: '样式设置',
+      path: '/admin/styles',
+      icon: <Layers2 className="mr-2 h-4 w-4" />,
     },
     {
       name: '站点设置',
