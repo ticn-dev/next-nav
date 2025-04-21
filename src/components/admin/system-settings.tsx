@@ -10,6 +10,7 @@ import { MetadataEditor } from './metadata-editor'
 import { FaviconUploader } from './favicon-uploader'
 import { toast } from '@/components/ui/use-toast'
 import { SystemSettingsRecord } from '@/types/settings'
+import { SystemDataBackup } from './system-data-backup'
 
 interface SystemSettingsProps {
   initialSettings: SystemSettingsRecord
@@ -60,10 +61,11 @@ export function SystemSettings({ initialSettings }: SystemSettingsProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="title" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="title">站点设置</TabsTrigger>
           <TabsTrigger value="metadata">元数据设置</TabsTrigger>
           <TabsTrigger value="favicon">图标设置</TabsTrigger>
+          <TabsTrigger value="backup">数据操作</TabsTrigger>
         </TabsList>
         <TabsContent value="title">
           <Card>
@@ -93,6 +95,9 @@ export function SystemSettings({ initialSettings }: SystemSettingsProps) {
         </TabsContent>
         <TabsContent value="favicon">
           <FaviconUploader initialFavicon="/api/icon/this" />
+        </TabsContent>
+        <TabsContent value="backup">
+          <SystemDataBackup></SystemDataBackup>
         </TabsContent>
       </Tabs>
     </div>

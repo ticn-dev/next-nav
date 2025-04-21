@@ -51,8 +51,8 @@ export async function saveData(targetPath: ResolvablePath, data: Uint8Array, met
 export async function deleteData(targetPath: ResolvablePath) {
   const { metadataPath, filePath } = await resolvePath(targetPath)
   try {
-    await fs.rm(metadataPath, { recursive: true })
-    await fs.rm(filePath, { recursive: true })
+    await fs.rm(metadataPath, { recursive: true, force: true })
+    await fs.rm(filePath, { recursive: true, force: true })
   } catch (error) {
     console.error('Error deleting file:', error)
     throw error

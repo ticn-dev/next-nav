@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { PrismaClient } from '@prisma/client'
 
 export type SystemSettings = {
   title: string
@@ -30,8 +31,8 @@ export async function getSystemSettings(...columns: string[]): Promise<Partial<S
   }
 }
 
-export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T]) {
-  await prisma.systemSettings.upsert({
+export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T], ctx: { systemSettings: (typeof prisma)['systemSettings'] }) {
+  await ctx.systemSettings.upsert({
     where: { key },
     update: { value },
     create: { key, value },
