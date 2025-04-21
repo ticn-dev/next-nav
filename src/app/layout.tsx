@@ -6,6 +6,7 @@ import { SettingsProvider } from '@/components/settings-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { SearchProvider } from '@/components/search-provider'
 import { Suspense } from 'react'
+import { CustomThemeProvider } from '@/components/custom-theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <CustomThemeProvider>
           <SettingsProvider>
             <Suspense>
               <SearchProvider>
@@ -22,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </SearchProvider>
             </Suspense>
           </SettingsProvider>
-        </ThemeProvider>
+        </CustomThemeProvider>
       </body>
     </html>
   )

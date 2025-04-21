@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { useSearch } from './search-provider'
 import { Input } from './ui/input'
 import { twMerge } from 'tailwind-merge'
+import { ThemeSelector } from './theme-selector'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -82,6 +83,7 @@ export default function Header() {
                 <span className="sr-only">GitHub</span>
               </Link>
             </Button>
+            <ThemeSelector />
             <ModeToggle />
             <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
               <Settings className="h-5 w-5" />
