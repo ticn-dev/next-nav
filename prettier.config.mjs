@@ -2,7 +2,7 @@ import * as TailwindPlugin from 'prettier-plugin-tailwindcss'
 
 /**
  * @see https://prettier.io/docs/configuration
- * @type {import("prettier").Config}
+ * @type {import('prettier').Config}
  */
 const config = {
   singleQuote: true,
@@ -11,6 +11,7 @@ const config = {
   bracketSpacing: true,
   tabWidth: 2,
   printWidth: 200,
+  endOfLine: 'lf',
   plugins: [TailwindPlugin],
 }
 

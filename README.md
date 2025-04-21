@@ -8,34 +8,34 @@ A navigation site based on Next.js
 ## Development
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/ticn-dev/next-nav.git && cd next-nav
-    ```
+   ```bash
+   git clone https://github.com/ticn-dev/next-nav.git && cd next-nav
+   ```
 2. Install dependencies:
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 3. Generate the Prisma client:
-    ```bash
-    npx prisma generate
-    ```
+   ```bash
+   npx prisma generate
+   ```
 4. Run the development server:
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Build
 
 1. Build the project:
-    ```bash
-    npm run build
-    ```
+   ```bash
+   npm run build
+   ```
 2. Start the production server:
-    ```bash
-    npm start
-    ```
+   ```bash
+   npm start
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
