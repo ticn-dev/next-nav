@@ -78,6 +78,7 @@ export async function POST(request: Request) {
         description: parsedRequest.description,
         categoryId: parsedRequest.categoryId,
         order: parsedRequest.order || 0,
+        hided: parsedRequest.hided || false,
       },
       include: {
         category: true,

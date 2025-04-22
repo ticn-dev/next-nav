@@ -8,19 +8,30 @@ interface Settings {
   openInNewTab: boolean
 }
 
+interface RendererSettings {
+  showHiddenSites: boolean
+}
+
 interface SettingsContextType {
   settings: Settings
+  rendererSettings: RendererSettings
   updateSettings: (settings: Partial<Settings>) => void
+  updateRendererSettings: (settings: Partial<RendererSettings>) => void
 }
 
 const defaultSettings: Settings = {
   openInNewTab: true,
 }
 
+const defaultRendererSettings: RendererSettings = {
+  showHiddenSites: false,
+}
+
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
+  const [rendererSettings, setRendererSettings] = useState<RendererSettings>(defaultRendererSettings)
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -33,6 +44,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to load settings:', error)
     }
+    try {
+      const savedRendererSettings = localStorage.getItem('nav-renderer-settings')
+      if (savedRendererSettings) {
+        setRendererSettings(JSON.parse(savedRendererSettings))
+      }
+    } catch (error) {
+      console.error('Failed to load renderer settings:', error)
+    }
     setIsLoaded(true)
   }, [])
 
@@ -43,11 +62,22 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [settings, isLoaded])
 
+  useEffect(() => {
+    // Save settings to localStorage when they change
+    if (isLoaded) {
+      localStorage.setItem('nav-renderer-settings', JSON.stringify(rendererSettings))
+    }
+  }, [rendererSettings, isLoaded])
+
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }))
   }
 
-  return <SettingsContext.Provider value={{ settings, updateSettings }}>{children}</SettingsContext.Provider>
+  const updateRendererSettings = (newSettings: Partial<RendererSettings>) => {
+    setRendererSettings((prev) => ({ ...prev, ...newSettings }))
+  }
+
+  return <SettingsContext.Provider value={{ settings, rendererSettings, updateSettings, updateRendererSettings }}>{children}</SettingsContext.Provider>
 }
 
 export function useSettings() {

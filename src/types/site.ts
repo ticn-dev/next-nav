@@ -11,6 +11,7 @@ export interface Site {
   imageMode: ImageMode
   order: number
   categoryId: number
+  hided: boolean
 }
 
 export interface SiteWithCategory extends Site {

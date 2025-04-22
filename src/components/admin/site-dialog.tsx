@@ -10,12 +10,14 @@ import { toast } from '@/components/ui/use-toast'
 import { useEffect, useRef, useState } from 'react'
 import { ImageMode, Site } from '@/types/site'
 import { Category } from '@/types/category'
-import { ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
+import { CircleHelp, ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
 import NumberInput from '@/components/number-input'
 import { useDebouncedCallback } from 'use-debounce'
 import FaviconImage from '@/components/favicon-image'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface SiteDialogProps {
   open: boolean
@@ -37,6 +39,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const [useNewCategory, setUseNewCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
   const [order, setOrder] = useState(0)
+  const [hided, setHided] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -56,6 +59,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setOrder(site.order)
       setStoredImageUrl(`/api/icon/${site.id}`)
       setImageTab(site.imageMode)
+      setHided(site.hided)
       // Set preview if site has an image
       if (site.imageUrl) {
         setPreviewUploadUrl(site.imageUrl)
@@ -72,6 +76,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
       setPreviewUploadUrl(null)
       setImageTab('auto-fetch')
       setStoredImageUrl('')
+      setHided(false)
     }
     setSelectedFile(null)
     setErrors({})
@@ -257,6 +262,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
         description: description || null,
         categoryId: Number.parseInt(categoryIdStr),
         order,
+        hided,
       })
 
       const formData = new FormData()
@@ -459,6 +465,26 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
                 className={errors.order ? 'border-destructive' : ''}
               ></NumberInput>
               {errors.order && <p className="text-destructive text-xs">{errors.order}</p>}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="hided" className="text-right">
+              隐藏
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground">
+                      <CircleHelp className="inline h-4 w-4" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>并不能真正地隐藏</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Label>
+            <div className="col-span-3 space-y-1">
+              <Checkbox id="hided" checked={hided} onCheckedChange={(e) => setHided(e as boolean)}></Checkbox>
             </div>
           </div>
           <div className="grid grid-cols-4 items-start gap-4">

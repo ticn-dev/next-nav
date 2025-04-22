@@ -7,5 +7,6 @@ export interface SiteRequest {
   imageMode: ImageMode
   description: string | null
   categoryId: number
-  order: number
+  order?: number
+  hided?: boolean
 }

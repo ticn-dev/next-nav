@@ -93,6 +93,7 @@ export async function PUT(request: NextRequest, { params: _params }: { params: P
         description: parsedRequest.description,
         categoryId: parsedRequest.categoryId,
         order: parsedRequest.order || 0,
+        hided: parsedRequest.hided || false,
       },
       include: {
         category: true,

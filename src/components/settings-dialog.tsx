@@ -14,7 +14,7 @@ interface SettingsDialogProps {
 }
 
 export function SettingsDialog({ open, onOpenChange, onAdminClick }: SettingsDialogProps) {
-  const { settings, updateSettings } = useSettings()
+  const { settings, rendererSettings, updateSettings, updateRendererSettings } = useSettings()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -27,6 +27,10 @@ export function SettingsDialog({ open, onOpenChange, onAdminClick }: SettingsDia
           <div className="flex items-center space-x-2">
             <Checkbox id="new-tab" checked={settings.openInNewTab} onCheckedChange={(checked) => updateSettings({ openInNewTab: checked as boolean })} />
             <Label htmlFor="new-tab">在新标签页中打开链接</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="show-hidden" checked={rendererSettings.showHiddenSites} onCheckedChange={(checked) => updateRendererSettings({ showHiddenSites: checked as boolean })} />
+            <Label htmlFor="show-hidden">显示隐藏的网站</Label>
           </div>
         </div>
         <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">

@@ -24,6 +24,7 @@ model Site {
   order       Int      @default(0)
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId  Int
+  hided       Boolean  @default(false)
 }
 
 model SystemSettings {
