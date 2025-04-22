@@ -107,10 +107,12 @@ export default function CategoryFilterableRenderer({ initialCategories }: Catego
         <CategoryNav categories={rendererCategories} className="hidden md:block" />
 
         {/* Scrollable content area for site listings */}
-        <div className="flex-1 space-y-8 overflow-y-auto pb-6">
-          {rendererCategories.map((category) => (
-            <CategorySection key={category.id} category={category} />
-          ))}
+        <div className="flex flex-1 justify-center overflow-y-auto">
+          <div className="w-full space-y-8 pb-6 transition-[width] duration-300 ease-in-out 2xl:w-5/7">
+            {rendererCategories.map((category) => (
+              <CategorySection key={category.id} category={category} />
+            ))}
+          </div>
         </div>
       </div>
     </>
