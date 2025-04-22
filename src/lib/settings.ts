@@ -1,5 +1,4 @@
 import { prisma } from './prisma'
-import { PrismaClient } from '@prisma/client'
 
 export type SystemSettings = {
   title: string

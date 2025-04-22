@@ -1,13 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Archive, ArchiveRestore } from 'lucide-react'
+import { Archive, ArchiveRestore, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import React, { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import Link from 'next/link'
 import { BackupRestoreOptions } from '@/lib/backup-restore'
 import { toast } from '@/components/ui/use-toast'
+import { BookmarksImport, BookmarksImportRef } from '@/components/admin/bookmarks-import'
+import { Bookmarks } from '@/lib/bookmarks-parser'
 
 const SelectBackupRestoreOptions: Record<keyof BackupRestoreOptions, string> = {
   systemSiteSettings: '系统站点设置',
@@ -43,6 +44,7 @@ function optionsToBackupRestoreOptions(options: CheckboxBackupRestoreOption[]): 
 export function SystemDataBackup() {
   const [isBacking, setIsBacking] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
   const [dialogTitle, setDialogTitle] = useState('')
   const [dialogDescription, setDialogDescription] = useState('')
@@ -51,6 +53,7 @@ export function SystemDataBackup() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const bookmarksImportRef = React.useRef<BookmarksImportRef>(null)
 
   useEffect(() => {
     if (!openDialog) {
@@ -164,6 +167,36 @@ export function SystemDataBackup() {
     setOpenDialog(false)
   }
 
+  const handleBookmarksSubmit = async (bookmarks: Bookmarks) => {
+    setIsImporting(true)
+    try {
+      const response = await fetch('/api/admin/system/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'bookmarks',
+          data: bookmarks,
+        }),
+      })
+      if (response.ok) {
+        toast({ title: '导入成功' })
+      } else {
+        throw new Error('导入失败')
+      }
+    } catch (error) {
+      console.error('Error during backup:', error)
+      toast({
+        title: '导入失败',
+        description: '请稍后重试',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   return (
     <>
       <Card>
@@ -190,8 +223,14 @@ export function SystemDataBackup() {
             <ArchiveRestore className="mr-2 h-4 w-4" />
             {isRestoring ? '恢复中...' : '恢复数据'}
           </Button>
+          <Button variant="outline" className="w-40" onClick={() => bookmarksImportRef?.current?.doSelect()}>
+            <Folder className="mr-2 h-4 w-4" />
+            {isImporting ? '书签...' : '导入书签'}
+          </Button>
         </CardContent>
       </Card>
+
+      <BookmarksImport ref={bookmarksImportRef} onSubmit={handleBookmarksSubmit}></BookmarksImport>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
