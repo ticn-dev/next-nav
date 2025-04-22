@@ -1,5 +1,6 @@
 import { SitesManager } from '@/components/admin/sites-manager'
 import { prisma } from '@/lib/prisma'
+import { SiteWithCategory } from '@/types/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export default async function SitesPage() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="mb-6 text-2xl font-bold">站点设置</h1>
-      <SitesManager initialSites={sites} initialCategories={categories} />
+      <SitesManager initialSites={sites as SiteWithCategory[]} initialCategories={categories} />
     </div>
   )
 }

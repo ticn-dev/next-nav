@@ -8,6 +8,7 @@ import { unstable_cache } from 'next/cache'
 import { readData } from '@/lib/uploads'
 import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 import CategoryFilterableRenderer from '@/components/category-filterable-renderer'
+import { CategoryWithSites } from '@/types/category'
 
 // This function enables ISR
 export const revalidate = 3600 // revalidate every hour
@@ -65,7 +66,7 @@ export default async function Home() {
     <>
       <Header />
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <CategoryFilterableRenderer initialCategories={categories}></CategoryFilterableRenderer>
+        <CategoryFilterableRenderer initialCategories={categories as CategoryWithSites[]}></CategoryFilterableRenderer>
         <Footer copyright={copyright} />
       </div>
     </>
