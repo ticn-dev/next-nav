@@ -23,7 +23,7 @@ export default async function AdminPage() {
   const settings = await getSystemSettingsConfig()
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto p-6">
       <h1 className="mb-6 text-2xl font-bold">系统设置</h1>
       <SystemSettings initialSettings={settings} />
     </div>
