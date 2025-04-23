@@ -41,7 +41,7 @@ export function MobileMenu({ categories }: MobileMenuProps) {
         <SheetHeader>
           <SheetTitle>分类导航</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 space-y-2">
+        <div className="mt-6 h-full space-y-2 overflow-auto">
           {categories.map((category) => (
             <Button key={category.id} variant="ghost" className="w-full justify-start" onClick={() => scrollToCategory(category.id)}>
               {category.name}
