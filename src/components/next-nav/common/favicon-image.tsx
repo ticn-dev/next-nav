@@ -36,5 +36,5 @@ export default function FaviconImage({ onErrorIcon, ...props }: FaviconImageProp
     }
   }
 
-  return <>{loadError ? onErrorIcon ? <>{onErrorIcon}</> : <Globe /> : <Image {...props} onError={handleError} alt={props.alt ?? 'favicon'} src={src} />}</>
+  return <>{loadError ? onErrorIcon ? <>{onErrorIcon}</> : <Globe className={props['className']} /> : <Image {...props} onError={handleError} alt={props.alt ?? 'favicon'} src={src} />}</>
 }

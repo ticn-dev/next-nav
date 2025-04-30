@@ -13,11 +13,12 @@ import { Category } from '@/types/category'
 import { CircleHelp, ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
-import NumberInput from '@/components/number-input'
+import NumberInput from '@/components/next-nav/common/number-input'
 import { useDebouncedCallback } from 'use-debounce'
-import FaviconImage from '@/components/favicon-image'
+import FaviconImage from '@/components/next-nav/common/favicon-image'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { newCategory, newSite, updateSites } from '@/lib/api'
 
 interface SiteDialogProps {
   open: boolean
@@ -29,7 +30,7 @@ interface SiteDialogProps {
 }
 
 export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCreate, onSave }: SiteDialogProps) {
-  const [title, setTitle] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [url, setUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [previewSetImageUrl, setPreviewSetImageUrl] = useState('')
@@ -51,7 +52,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
 
   useEffect(() => {
     if (site) {
-      setTitle(site.title)
+      setDisplayName(site.displayName)
       setUrl(site.url)
       setImageUrl(site.imageUrl || '')
       setDescription(site.description || '')
@@ -67,7 +68,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
         setPreviewUploadUrl(null)
       }
     } else {
-      setTitle('')
+      setDisplayName('')
       setUrl('')
       setImageUrl('')
       setDescription('')
@@ -162,9 +163,9 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!title.trim()) {
+    if (!displayName.trim()) {
       newErrors.title = '名称不能为空'
-    } else if (title.length > 20) {
+    } else if (displayName.length > 20) {
       newErrors.title = '名称不能超过20个字符'
     }
 
@@ -228,34 +229,17 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
     try {
       let categoryIdStr = categoryId
       if (useNewCategory) {
-        const newCategoryResponse = await fetch('/api/admin/categories', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: newCategoryName,
-            order: 0,
-          }),
-        })
+        const category = await newCategory({ displayName: newCategoryName })
 
-        if (newCategoryResponse.ok) {
-          const newCategory = await newCategoryResponse.json()
-          categoryIdStr = newCategory.id.toString()
-          onCategoryCreate(newCategory)
-          setCategoryId(categoryIdStr)
-          setUseNewCategory(false)
-          setNewCategoryName('')
-        } else {
-          throw new Error('Failed to create new category')
-        }
+        categoryIdStr = category.id.toString()
+        onCategoryCreate(category)
+        setCategoryId(categoryIdStr)
+        setUseNewCategory(false)
+        setNewCategoryName('')
       }
 
-      const method = site ? 'PUT' : 'POST'
-      const endpoint = site ? `/api/admin/sites/${site.id}` : '/api/admin/sites'
-
-      const request = JSON.stringify({
-        title,
+      const requestBody = {
+        displayName,
         url,
         imageUrl: imageUrl || null,
         imageMode: imageTab,
@@ -263,30 +247,21 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
         categoryId: Number.parseInt(categoryIdStr),
         order,
         hided,
-      })
-
-      const formData = new FormData()
-      formData.append('request', request)
-      if (imageTab === 'upload' && selectedFile) {
-        formData.append('imageData', selectedFile)
       }
 
-      const response = await fetch(endpoint, {
-        method,
-        body: formData,
-      })
-
-      if (response.ok) {
-        const savedSite = await response.json()
-        onSave(savedSite)
-        toast({
-          title: site ? '更新成功' : '添加成功',
-          description: site ? '站点已更新' : '站点已添加',
-        })
-        onOpenChange(false)
+      let savedSite: Site
+      if (site) {
+        savedSite = (await updateSites(site.id, requestBody))[0]
       } else {
-        throw new Error(site ? 'Failed to update site' : 'Failed to add site')
+        savedSite = await newSite(requestBody, selectedFile ?? undefined)
       }
+
+      onSave(savedSite)
+      toast({
+        title: site ? '更新成功' : '添加成功',
+        description: site ? '站点已更新' : '站点已添加',
+      })
+      onOpenChange(false)
     } catch (error) {
       console.error('Error saving site:', error)
       toast({
@@ -320,7 +295,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               名称 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="title" maxLength={20} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="站点名称" className={errors.title ? 'border-destructive' : ''} />
+              <Input id="title" maxLength={20} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="站点名称" className={errors.title ? 'border-destructive' : ''} />
               {errors.title && <p className="text-destructive text-xs">{errors.title}</p>}
             </div>
           </div>
@@ -391,7 +366,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
               {/* Image preview */}
               {imageTab === 'url' && (
                 <div className="bg-muted/30 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border">
-                  <FaviconImage alt="图标预览" src={previewSetImageUrl || storedImageUrl} fill={true} className="object-contain" />
+                  <FaviconImage alt="图标预览" src={previewSetImageUrl || storedImageUrl} fill={true} className="object-contain" loading="lazy" />
                 </div>
               )}
               {imageTab === 'upload' && (
@@ -437,7 +412,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
                   <SelectContent>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
+                        {category.displayName}
                       </SelectItem>
                     ))}
                     <SelectItem value="#new" className="text-purple-500 focus:text-purple-500">

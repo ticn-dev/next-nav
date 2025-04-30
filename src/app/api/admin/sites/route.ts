@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma'
 import { fetchIcon } from '@/lib/favicon'
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { submitBgTask } from '@/lib/background-task'
 import { saveData } from '@/lib/uploads'
 import { resolveIconPath } from '@/lib/path-resolver'
-import { SiteRequest } from '@/types/requests'
+import { Site } from '@/types/site'
 
 export async function GET() {
   try {
@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
-    let parsedRequest: SiteRequest
+    let parsedRequest: Omit<Site, 'id'>
     try {
       const requestStr = formData.get('request')
       if (typeof requestStr !== 'string') {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request format' }, { status: 400 })
     }
 
-    if (!parsedRequest.title || !parsedRequest.url || !parsedRequest.categoryId) {
+    if (!parsedRequest.displayName || !parsedRequest.url || !parsedRequest.categoryId) {
       return NextResponse.json({ error: 'Title, URL, and category are required' }, { status: 400 })
     }
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     // Create the site
     const site = await prisma.site.create({
       data: {
-        title: parsedRequest.title,
+        displayName: parsedRequest.displayName,
         url: parsedRequest.url,
         imageUrl: useImageUrl,
         imageMode: parsedRequest.imageMode,
@@ -128,5 +128,47 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating site:', error)
     return NextResponse.json({ error: 'Failed to create site' }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = (await request.json()) as { ids: number[]; value: Omit<Site, 'id'> }
+
+    const { ids, value } = body
+
+    // Update only the provided fields
+    const site = await prisma.site.updateManyAndReturn({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: value,
+      include: {
+        category: true,
+      },
+    })
+
+    return NextResponse.json(site)
+  } catch (error) {
+    console.error('Error patching site:', error)
+    return NextResponse.json({ error: 'Failed to update site' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const ids = (await request.json()) as number[]
+    await prisma.site.deleteMany({
+      where: { id: { in: ids } },
+    })
+
+    revalidateTag('index')
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting site:', error)
+    return NextResponse.json({ error: 'Failed to delete site' }, { status: 500 })
   }
 }

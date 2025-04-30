@@ -5,47 +5,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MetadataEditor } from './metadata-editor'
 import { FaviconUploader } from './favicon-uploader'
 import { toast } from '@/components/ui/use-toast'
-import { SystemSettingsRecord } from '@/types/settings'
 import { SystemDataBackup } from './system-data-backup'
+import { updateSiteSettings } from '@/lib/api'
+import { MetaData } from '@/types/metadata'
+import { Switch } from '@/components/ui/switch'
+import { useAdminSettings } from '@/components/next-nav/context/admin-settings-provider'
 
-interface SystemSettingsProps {
-  initialSettings: SystemSettingsRecord
-}
-
-export function SystemSettings({ initialSettings }: SystemSettingsProps) {
-  const [title, setTitle] = useState(initialSettings.title)
-  const [copyright, setCopyright] = useState(initialSettings.copyright)
+export function SystemSettings() {
+  const { settings, updateSettings } = useAdminSettings()
+  const [title, setTitle] = useState(settings.title)
+  const [copyright, setCopyright] = useState(settings.copyright)
+  const [showGithubButton, setShowGithubButton] = useState(settings.showGithubButton)
+  const [metadata, setMetadata] = useState<MetaData[]>(settings.metadata)
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    setTitle(settings.title)
+    setCopyright(settings.copyright)
+    setShowGithubButton(settings.showGithubButton)
+    setMetadata(settings.metadata)
+  }, [settings])
 
   const handleSaveSiteSettings = async () => {
     setIsSaving(true)
     try {
-      const response = await fetch('/api/admin/system', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([
-          { key: 'title', value: title },
-          { key: 'copyright', value: copyright },
-        ]),
-      })
+      await updateSiteSettings({ title, copyright, showGithubButton })
 
-      if (response.ok) {
-        toast({
-          title: '保存成功',
-          description: '网站标题已更新',
-        })
-        const currentTitle = document.title
-        const prefix = currentTitle.split('|', 2)[0].trim()
-        document.title = `${prefix} | ${title || 'Next Nav'}`
-      } else {
-        throw new Error('Failed to save title')
-      }
+      updateSettings({ title, copyright, showGithubButton })
+
+      toast({
+        title: '保存成功',
+        description: '网站设置已更新',
+      })
     } catch (error) {
       console.error('Error saving title:', error)
       toast({
@@ -75,14 +70,27 @@ export function SystemSettings({ initialSettings }: SystemSettingsProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">站点名称</Label>
-                <span className="text-muted-foreground text-sm">直接展示在网页标签栏上的名称</span>
+                <span>站点名称</span>
+                <Label className="text-muted-foreground text-sm" htmlFor="title">
+                  直接展示在网页标签栏上的名称
+                </Label>
                 <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Next Nav" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="copyright">版权信息</Label>
-                <span className="text-muted-foreground text-sm">直接展示在网页底部的版权信息</span>
+                <span>版权信息</span>
+                <Label className="text-muted-foreground text-sm" htmlFor="copyright">
+                  直接展示在网页底部的版权信息
+                </Label>
                 <Input id="copyright" value={copyright} onChange={(e) => setCopyright(e.target.value)} placeholder="Kairlec-NextNav" />
+              </div>
+              <div className="space-y-2">
+                <span>显示Github图标</span>
+                <div>
+                  <Label className="text-muted-foreground mb-1 text-sm" htmlFor="showGithubButton">
+                    顶栏菜单上的按钮
+                  </Label>
+                  <Switch id="showGithubButton" checked={showGithubButton} onCheckedChange={(e) => setShowGithubButton(e)} />
+                </div>
               </div>
               <Button onClick={handleSaveSiteSettings} disabled={isSaving}>
                 {isSaving ? '保存中...' : '保存'}
@@ -91,10 +99,10 @@ export function SystemSettings({ initialSettings }: SystemSettingsProps) {
           </Card>
         </TabsContent>
         <TabsContent value="metadata">
-          <MetadataEditor initialMetadata={initialSettings.metadata} />
+          <MetadataEditor initialMetadata={metadata} onUpdate={setMetadata} />
         </TabsContent>
         <TabsContent value="favicon">
-          <FaviconUploader initialFavicon="/api/icon/this" />
+          <FaviconUploader initialFavicon="/api/icon/this" onUpdate={(url) => updateSettings({ iconUrl: url })} />
         </TabsContent>
         <TabsContent value="backup">
           <SystemDataBackup></SystemDataBackup>

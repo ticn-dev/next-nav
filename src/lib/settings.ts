@@ -3,11 +3,12 @@ import { prisma } from './prisma'
 export type SystemSettings = {
   title: string
   copyright: string
+  showGithubButton: boolean
 }
 
 type SystemSettingsKey = keyof SystemSettings
 
-export async function getSystemSettings<T extends SystemSettingsKey>(column: T, ...moreColumns: T[]): Promise<{ [key in T]: string }>
+export async function getSystemSettings<T extends SystemSettingsKey>(column: T, ...moreColumns: T[]): Promise<{ [key in T]: SystemSettings[key] }>
 export async function getSystemSettings(): Promise<SystemSettings>
 export async function getSystemSettings(...columns: string[]): Promise<Partial<SystemSettings>> {
   prisma.systemSettings.findMany({
@@ -27,13 +28,14 @@ export async function getSystemSettings(...columns: string[]): Promise<Partial<S
   return {
     title: settings.title || '',
     copyright: settings.copyright || '',
+    showGithubButton: settings.showGithubButton !== 'false',
   }
 }
 
 export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T], ctx: { systemSettings: (typeof prisma)['systemSettings'] }) {
   await ctx.systemSettings.upsert({
     where: { key },
-    update: { value },
-    create: { key, value },
+    update: { value: value.toString() },
+    create: { key, value: value.toString() },
   })
 }

@@ -20,7 +20,7 @@ interface ParsedResult {
   uncategorizedCount: number
 }
 
-export function BookmarksImport({ ref, onSubmit }: BookmarksImportProps) {
+export function AdminBookmarksImport({ ref, onSubmit }: BookmarksImportProps) {
   const [openDialog, setOpenDialog] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const [parsedBookmarks, setParsedBookmarks] = React.useState<ParsedResult>({

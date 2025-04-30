@@ -1,7 +1,6 @@
 import { MetaData } from './metadata'
+import { SystemSettings } from '@/lib/settings'
 
-export interface SystemSettingsRecord {
-  title: string
-  copyright: string
+export interface SystemSettingsRecord extends SystemSettings {
   metadata: MetaData[]
 }

@@ -1,5 +1,24 @@
 import { prisma } from '@/lib/prisma'
 import { type NextRequest, NextResponse } from 'next/server'
+import { getSystemSettings } from '@/lib/settings'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(request: NextRequest) {
+  try {
+    const settings = await getSystemSettings('title', 'copyright', 'showGithubButton')
+    const metadata = await prisma.metaData.findMany()
+
+    return NextResponse.json({
+      title: settings.title || 'Next Nav',
+      copyright: settings.copyright,
+      showGithubButton: settings.showGithubButton,
+      metadata,
+    })
+  } catch (error) {
+    console.error('Error fetching system settings:', error)
+    return NextResponse.json({ error: 'Failed to fetch system settings' }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

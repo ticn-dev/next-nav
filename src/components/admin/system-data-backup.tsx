@@ -7,8 +7,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { BackupRestoreOptions } from '@/lib/backup-restore'
 import { toast } from '@/components/ui/use-toast'
-import { BookmarksImport, BookmarksImportRef } from '@/components/admin/bookmarks-import'
+import { AdminBookmarksImport, BookmarksImportRef } from '@/components/next-nav/admin/admin-bookmarks-import'
 import { Bookmarks } from '@/lib/bookmarks-parser'
+import { doSystemBackup, doSystemRestore, importBookmarks } from '@/lib/api'
 
 const SelectBackupRestoreOptions: Record<keyof BackupRestoreOptions, string> = {
   systemSiteSettings: '系统站点设置',
@@ -68,26 +69,12 @@ export function SystemDataBackup() {
   const handleBackup = async (backupRestoreOptions: BackupRestoreOptions) => {
     setIsBacking(true)
     try {
-      const response = await fetch('/api/admin/system/backup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(backupRestoreOptions),
-      })
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        const contentDisposition = response.headers.get('Content-Disposition')
-        const filename = contentDisposition ? contentDisposition.split('filename=')[1].replace(/['"]/g, '') : 'backup.zip'
-        a.href = url
-        a.download = filename
-        a.click()
-        URL.revokeObjectURL(url)
-      } else {
-        throw new Error('备份失败')
-      }
+      const { url, filename, revoke } = await doSystemBackup(backupRestoreOptions)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      revoke()
     } catch (error) {
       console.error('Error during backup:', error)
       toast({
@@ -102,22 +89,13 @@ export function SystemDataBackup() {
 
   const handleRestore = async (backupRestoreOptions: BackupRestoreOptions, file: File) => {
     setIsRestoring(true)
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('options', JSON.stringify(backupRestoreOptions))
     try {
-      const response = await fetch('/api/admin/system/restore', {
-        method: 'POST',
-        body: formData,
-      })
-      if (response.ok) {
-        toast({ title: '恢复成功', description: '数据已成功恢复,将在2s后刷新页面' })
-        setTimeout(() => {
-          window.location.reload()
-        }, 2000)
-      } else {
-        throw new Error('恢复失败')
-      }
+      await doSystemRestore(backupRestoreOptions, file)
+
+      toast({ title: '恢复成功', description: '数据已成功恢复,将在2s后刷新页面' })
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     } catch (error) {
       console.error('Error during restore:', error)
       toast({
@@ -170,21 +148,8 @@ export function SystemDataBackup() {
   const handleBookmarksSubmit = async (bookmarks: Bookmarks) => {
     setIsImporting(true)
     try {
-      const response = await fetch('/api/admin/system/import', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'bookmarks',
-          data: bookmarks,
-        }),
-      })
-      if (response.ok) {
-        toast({ title: '导入成功' })
-      } else {
-        throw new Error('导入失败')
-      }
+      await importBookmarks(bookmarks)
+      toast({ title: '导入成功' })
     } catch (error) {
       console.error('Error during backup:', error)
       toast({
@@ -230,7 +195,7 @@ export function SystemDataBackup() {
         </CardContent>
       </Card>
 
-      <BookmarksImport ref={bookmarksImportRef} onSubmit={handleBookmarksSubmit}></BookmarksImport>
+      <AdminBookmarksImport ref={bookmarksImportRef} onSubmit={handleBookmarksSubmit}></AdminBookmarksImport>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>

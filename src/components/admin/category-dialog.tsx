@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
 import { Category } from '@/types/category'
-import NumberInput from '@/components/number-input'
+import NumberInput from '@/components/next-nav/common/number-input'
+import { newCategory, updateCategories } from '@/lib/api'
 
 interface CategoryDialogProps {
   open: boolean
@@ -17,17 +18,17 @@ interface CategoryDialogProps {
 }
 
 export function CategoryDialog({ open, onOpenChange, category, onSave }: CategoryDialogProps) {
-  const [name, setName] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [order, setOrder] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (category) {
-      setName(category.name)
+      setDisplayName(category.displayName)
       setOrder(category.order)
     } else {
-      setName('')
+      setDisplayName('')
       setOrder(0)
     }
     setErrors({})
@@ -36,7 +37,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!name.trim()) {
+    if (!displayName.trim()) {
       newErrors.name = '名称不能为空'
     }
 
@@ -53,31 +54,23 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
 
     setIsSaving(true)
     try {
-      const method = category ? 'PUT' : 'POST'
-      const endpoint = category ? `/api/admin/categories/${category.id}` : '/api/admin/categories'
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          order,
-        }),
-      })
-
-      if (response.ok) {
-        const savedCategory = await response.json()
-        onSave(savedCategory)
-        toast({
-          title: category ? '更新成功' : '添加成功',
-          description: category ? '分类已更新' : '分类已添加',
-        })
-        onOpenChange(false)
+      let savedCategory: Category
+      if (category) {
+        savedCategory = (
+          await updateCategories(category.id, {
+            displayName,
+            order,
+          })
+        )[0]
       } else {
-        throw new Error(category ? 'Failed to update category' : 'Failed to add category')
+        savedCategory = await newCategory({ displayName, order })
       }
+      onSave(savedCategory)
+      toast({
+        title: category ? '更新成功' : '添加成功',
+        description: category ? '分类已更新' : '分类已添加',
+      })
+      onOpenChange(false)
     } catch (error) {
       console.error('Error saving category:', error)
       toast({
@@ -111,7 +104,7 @@ export function CategoryDialog({ open, onOpenChange, category, onSave }: Categor
               名称 *
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input id="name" maxLength={20} value={name} onChange={(e) => setName(e.target.value)} placeholder="分类名称" className={errors.name ? 'border-destructive' : ''} />
+              <Input id="name" maxLength={20} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="分类名称" className={errors.name ? 'border-destructive' : ''} />
               {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
             </div>
           </div>

@@ -4,7 +4,7 @@ export type ImageMode = 'url' | 'upload' | 'auto-fetch'
 
 export interface Site {
   id: number
-  title: string
+  displayName: string
   description: string | null
   url: string
   imageUrl: string | null

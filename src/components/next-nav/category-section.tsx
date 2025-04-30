@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { SiteCard } from './site-card'
+import { SiteCard } from '@/components/next-nav/site-card'
 import { CategoryWithSites } from '@/types/category'
 
 interface CategorySectionProps {
@@ -42,7 +42,7 @@ export function CategorySection({ category }: CategorySectionProps) {
   return (
     <section id={`category-${category.id}`} className="category-section">
       <div ref={headerRef} className="bg-background sticky top-0 z-10 mb-2 px-4 py-2">
-        <h2 className="text-2xl font-bold">{category.name}</h2>
+        <h2 className="text-2xl font-bold">{category.displayName}</h2>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3">
         {category.sites.map((site) => (

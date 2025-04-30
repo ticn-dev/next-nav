@@ -25,7 +25,7 @@ if (defaultCategory === null) {
   await prisma.category.create({
     data: {
       id: -1,
-      name: '默认分类',
+      displayName: '默认分类',
       order: 0,
     },
   })

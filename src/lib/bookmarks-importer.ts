@@ -9,7 +9,7 @@ export async function saveBookmarksToDatabase(bookmarks: Bookmarks) {
     for (const category of bookmarks.categories) {
       const newCategory = await ctx.category.create({
         data: {
-          name: category.title,
+          displayName: category.title,
           order: 0,
         },
       })
@@ -44,7 +44,7 @@ export async function saveBookmarksToDatabase(bookmarks: Bookmarks) {
         }
         const site = await ctx.site.create({
           data: {
-            title: bookmark.title,
+            displayName: bookmark.title,
             url: bookmark.url,
             description: null,
             imageUrl,

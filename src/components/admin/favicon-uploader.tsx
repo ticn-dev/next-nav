@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Globe, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
+import { uploadSiteFavicon } from '@/lib/api'
 
 interface FaviconUploaderProps {
   initialFavicon: string
@@ -47,28 +48,16 @@ export function FaviconUploader({ initialFavicon, onUpdate }: FaviconUploaderPro
 
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('favicon', file)
+      const faviconUrl = await uploadSiteFavicon(file)
 
-      const response = await fetch('/api/admin/favicon', {
-        method: 'POST',
-        body: formData,
+      const newFaviconUrl = `${faviconUrl}?t=${Date.now()}`
+      setFavicon(newFaviconUrl) // Force refresh the image
+      setIconError(false) // Reset error state
+      toast({
+        title: '上传成功',
+        description: '网站图标已更新',
       })
-
-      if (response.ok) {
-        const data = await response.json()
-        const newFaviconUrl = `${data.faviconUrl}?t=${Date.now()}`
-        setFavicon(newFaviconUrl) // Force refresh the image
-        setIconError(false) // Reset error state
-        toast({
-          title: '上传成功',
-          description: '网站图标已更新',
-        })
-        onUpdate?.(newFaviconUrl)
-        document.head.querySelector("link[rel='icon']")?.setAttribute('href', newFaviconUrl)
-      } else {
-        throw new Error('Failed to upload favicon')
-      }
+      onUpdate?.(newFaviconUrl)
     } catch (error) {
       console.error('Error uploading favicon:', error)
       toast({
