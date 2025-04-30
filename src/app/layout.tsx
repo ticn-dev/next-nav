@@ -1,10 +1,10 @@
 import type React from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
-import { SettingsProvider } from '@/components/settings-provider'
+import { ThemeProvider } from '@/components/next-nav/context/theme-provider'
+import { SettingsProvider } from '@/components/next-nav/context/settings-provider'
 import { Toaster } from '@/components/ui/sonner'
-import { SearchProvider } from '@/components/search-provider'
+import { SearchProvider } from '@/components/next-nav/context/search-provider'
 import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })

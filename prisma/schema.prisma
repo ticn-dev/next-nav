@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
-  name  String
-  order Int    @default(0)
-  sites Site[]
+  id          Int    @id @default(autoincrement())
+  displayName String
+  order       Int    @default(0)
+  sites       Site[]
 }
 
 model Site {
   id          Int      @id @default(autoincrement())
-  title       String
+  displayName String
   description String?
   url         String
   imageUrl    String?

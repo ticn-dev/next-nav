@@ -1,24 +1,26 @@
 'use client'
 
-import { CategoryNav } from '@/components/category-nav'
-import { CategorySection } from '@/components/category-section'
+import { CategorySection } from '@/components/next-nav/category-section'
 import React, { useEffect, useRef, useState } from 'react'
-import { MobileMenu } from '@/components/mobile-menu'
 import { CategoryWithSites } from '@/types/category'
-import { useSearch } from '@/components/search-provider'
+import { CategoryNav } from '@/components/next-nav/category-nav'
+import { MobileMenu } from '@/components/next-nav/mobile-menu'
+import { useSearch } from '@/components/next-nav/context/search-provider'
+import { useSettings } from '@/components/next-nav/context/settings-provider'
 import { useDebouncedCallback } from 'use-debounce'
-import { useSettings } from '@/components/settings-provider'
 import { Site } from '@/types/site'
 
 interface CategoryFilterableRendererProps {
   initialCategories: CategoryWithSites[]
+  menuOpen?: boolean
+  onMenuOpenChange?: (open: boolean) => void
 }
 
 function canDisplay(site: Site, rendererSettings: { showHiddenSites: boolean }) {
   return rendererSettings.showHiddenSites || !site.hided
 }
 
-export default function CategoryFilterableRenderer({ initialCategories }: CategoryFilterableRendererProps) {
+export function CategoryFilterableRenderer({ initialCategories, menuOpen, onMenuOpenChange }: CategoryFilterableRendererProps) {
   const { searchQuery } = useSearch()
   const [visibleCategories, setVisibleCategories] = useState<CategoryWithSites[]>(initialCategories)
   const [rendererCategories, setRendererCategories] = useState<CategoryWithSites[]>([])
@@ -27,7 +29,6 @@ export default function CategoryFilterableRenderer({ initialCategories }: Catego
   const workerRef = useRef<Worker>(null)
 
   useEffect(() => {
-    console.log('Renderer settings changed:', rendererSettings)
     setRendererCategories(
       visibleCategories
         .map((category) => {
@@ -45,10 +46,8 @@ export default function CategoryFilterableRenderer({ initialCategories }: Catego
   }, [rendererSettings, visibleCategories])
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL('../search-worker.ts', import.meta.url))
+    workerRef.current = new Worker(new URL('../../search-worker.ts', import.meta.url))
     workerRef.current.onmessage = (event: MessageEvent<number[]>) => {
-      console.debug('Worker completed calculation:', event.data)
-
       const filteredSiteIds = new Set(event.data)
 
       // render the filtered categories
@@ -99,7 +98,7 @@ export default function CategoryFilterableRenderer({ initialCategories }: Catego
   return (
     <>
       <div className="px-4 py-2 md:hidden">
-        <MobileMenu categories={rendererCategories} />
+        <MobileMenu categories={rendererCategories} open={menuOpen} onOpenChange={onMenuOpenChange} />
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -108,7 +107,7 @@ export default function CategoryFilterableRenderer({ initialCategories }: Catego
 
         {/* Scrollable content area for site listings */}
         <div className="flex flex-1 justify-center overflow-y-auto">
-          <div className="w-full space-y-8 pb-6 transition-[width] duration-300 ease-in-out 2xl:w-5/7">
+          <div className="w-full space-y-8 pb-6 transition-[width] duration-300 2xl:w-5/7">
             {rendererCategories.map((category) => (
               <CategorySection key={category.id} category={category} />
             ))}

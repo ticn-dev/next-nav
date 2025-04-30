@@ -2,7 +2,7 @@ import { Site } from '@/types/site'
 
 export interface Category {
   id: number
-  name: string
+  displayName: string
   order: number
 }
 

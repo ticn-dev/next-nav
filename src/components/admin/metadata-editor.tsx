@@ -10,6 +10,7 @@ import { Plus, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 import { MetaData } from '@/types/metadata'
+import { updateSiteMetadata } from '@/lib/api'
 
 interface EditableMetaData extends MetaData {
   id: number
@@ -43,15 +44,15 @@ const predefinedKeys = new Set([
 
 const predefinedKeysArray = Array.from(predefinedKeys.values())
 
+function wrapMetadata(metadata: MetaData): EditableMetaData {
+  return {
+    ...metadata,
+    [isCustomKey]: !predefinedKeys.has(metadata.key),
+  }
+}
+
 export function MetadataEditor({ initialMetadata, onUpdate }: MetadataEditorProps) {
-  const [metadata, setMetadata] = useState<EditableMetaData[]>(
-    initialMetadata.map((item) => {
-      return {
-        ...item,
-        [isCustomKey]: !predefinedKeys.has(item.key),
-      }
-    }),
-  )
+  const [metadata, setMetadata] = useState<EditableMetaData[]>(initialMetadata.map(wrapMetadata))
   const [isSaving, setIsSaving] = useState(false)
 
   const addMetadata = () => {
@@ -95,25 +96,13 @@ export function MetadataEditor({ initialMetadata, onUpdate }: MetadataEditorProp
 
     setIsSaving(true)
     try {
-      const response = await fetch('/api/admin/metadata', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ metadata }),
+      const updatedMetadata = await updateSiteMetadata(metadata)
+      setMetadata(updatedMetadata.map(wrapMetadata))
+      toast({
+        title: '保存成功',
+        description: '元数据已更新',
       })
-
-      if (response.ok) {
-        const updatedMetadata = await response.json()
-        setMetadata(updatedMetadata)
-        toast({
-          title: '保存成功',
-          description: '元数据已更新',
-        })
-        onUpdate?.(updatedMetadata)
-      } else {
-        throw new Error('Failed to save metadata')
-      }
+      onUpdate?.(updatedMetadata)
     } catch (error) {
       console.error('Error saving metadata:', error)
       toast({

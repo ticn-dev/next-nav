@@ -1,17 +1,14 @@
 'use client'
 
-import { useSettings } from '@/components/settings-provider'
-import { Globe } from 'lucide-react'
-import Image from 'next/image'
-import { useState } from 'react'
+import { useSettings } from './context/settings-provider'
 import { Site } from '@/types/site'
+import FaviconImage from '@/components/next-nav/common/favicon-image'
 
 interface SiteCardProps {
   site: Site
 }
 
 export function SiteCard({ site }: SiteCardProps) {
-  const [imageError, setImageError] = useState(false)
   const { settings } = useSettings()
 
   const handleClick = () => {
@@ -35,13 +32,9 @@ export function SiteCard({ site }: SiteCardProps) {
 
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300">
-          {!imageError ? (
-            <Image src={iconUrl} alt={site.title} width={48} height={48} className="h-12 w-12 object-contain" onError={() => setImageError(true)} loading="lazy" />
-          ) : (
-            <Globe className="h-12 w-12" />
-          )}
+          <FaviconImage alt={site.displayName} src={iconUrl} width={48} height={48} className="h-12 w-12 object-contain" loading="lazy" />
         </div>
-        <h3 className="font-medium text-gray-900 transition-colors duration-300 group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">{site.title}</h3>
+        <h3 className="font-medium text-gray-900 transition-colors duration-300 group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">{site.displayName}</h3>
       </div>
 
       {/* Custom content if provided */}

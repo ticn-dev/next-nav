@@ -1,14 +1,12 @@
-import { Footer } from '@/components/footer'
 import { prisma } from '@/lib/prisma'
 import { getSystemSettings } from '@/lib/settings'
-import Header from '@/components/header'
 import type React from 'react'
 import { Metadata } from 'next'
 import { unstable_cache } from 'next/cache'
 import { readData } from '@/lib/uploads'
 import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
-import CategoryFilterableRenderer from '@/components/category-filterable-renderer'
 import { CategoryWithSites } from '@/types/category'
+import { MainComponent } from '@/components/next-nav/main-component'
 
 // This function enables ISR
 export const revalidate = 3600 // revalidate every hour
@@ -59,16 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const categories = await getCachedCategories()
-  const systemSettings = await getSystemSettings('copyright')
-  const copyright = systemSettings.copyright || 'Kairlec-NextNav'
+  const systemSettings = await getSystemSettings('copyright', 'showGithubButton')
 
-  return (
-    <>
-      <Header />
-      <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <CategoryFilterableRenderer initialCategories={categories as CategoryWithSites[]}></CategoryFilterableRenderer>
-        <Footer copyright={copyright} />
-      </div>
-    </>
-  )
+  return <MainComponent initialCategories={categories as CategoryWithSites[]} showGithubButton={systemSettings.showGithubButton} copyright={systemSettings.copyright} />
 }

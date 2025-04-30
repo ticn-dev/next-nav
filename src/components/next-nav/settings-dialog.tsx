@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { useSettings } from './settings-provider'
+import { useSettings } from '@/components/next-nav/context/settings-provider'
 import Link from 'next/link'
 
 interface SettingsDialogProps {

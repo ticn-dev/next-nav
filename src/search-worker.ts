@@ -8,7 +8,7 @@ function buildMeta(data: Site[]) {
   searcher.indexEntities(
     data,
     (e) => e.id,
-    (e) => [e.title, e.url, e.description || ''],
+    (e) => [e.displayName, e.url, e.description || ''],
   )
 }
 

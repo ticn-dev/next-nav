@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
+import { updateLoginAccount } from '@/lib/api'
 
 interface LoginSettingsProps {
   initialUsername: string
@@ -51,27 +52,14 @@ export function LoginSettings({ initialUsername }: LoginSettingsProps) {
 
     setIsSaving(true)
     try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      })
+      await updateLoginAccount(username, password)
 
-      if (response.ok) {
-        toast({
-          title: '保存成功',
-          description: '管理员账号已更新',
-        })
-        setPassword('')
-        setConfirmPassword('')
-      } else {
-        throw new Error('Failed to update admin account')
-      }
+      toast({
+        title: '保存成功',
+        description: '管理员账号已更新',
+      })
+      setPassword('')
+      setConfirmPassword('')
     } catch (error) {
       console.error('Error saving admin account:', error)
       toast({

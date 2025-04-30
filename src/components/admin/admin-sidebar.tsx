@@ -1,33 +1,20 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import { usePathname, useRouter } from 'next/navigation'
 import { Database, Globe, Lock, Settings } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet'
 
 interface AdminSidebarProps {
   className?: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function AdminSidebar({ className }: AdminSidebarProps) {
+export function AdminSidebar({ className, open, onOpenChange }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    const handleToggle = (e: Event) => {
-      const customEvent = e as CustomEvent
-      setOpen(customEvent.detail.isOpen)
-    }
-
-    document.addEventListener('toggleAdminMobileMenu', handleToggle)
-
-    return () => {
-      document.removeEventListener('toggleAdminMobileMenu', handleToggle)
-    }
-  }, [])
 
   const menuItems = [
     {
@@ -61,7 +48,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           className="w-full justify-start"
           onClick={() => {
             router.push(item.path)
-            setOpen(false)
+            onOpenChange(false)
           }}
         >
           {item.icon}
@@ -75,7 +62,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
     <>
       <aside className={cn('bg-background w-64 shrink-0 border-r p-4', className)}>{sidebarContent}</aside>
 
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="left" className="w-64 transition-transform duration-300">
           <SheetHeader>
             <SheetTitle>管理菜单</SheetTitle>
