@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BackupRestoreOptions } from '@/lib/backup-restore'
 import { applyRestorableOperator, loadBackupFromZipFile } from '@/lib/backup-restore-helper'
+import { revalidateTag } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,8 @@ export async function POST(request: NextRequest) {
 
     const restorableOperator = await loadBackupFromZipFile(zipData, backupRestoreOptions)
     await applyRestorableOperator(restorableOperator, backupRestoreOptions)
+
+    revalidateTag('index')
 
     return NextResponse.json({ message: 'Backup restored successfully' }, { status: 200 })
   } catch (error) {

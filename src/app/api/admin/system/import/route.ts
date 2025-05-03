@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveBookmarksToDatabase } from '@/lib/bookmarks-importer'
+import { revalidateTag } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,8 @@ export async function POST(request: NextRequest) {
     } else {
       throw new Error('Unsupported type')
     }
+
+    revalidateTag('index')
 
     return NextResponse.json({ message: 'Backup restored successfully' }, { status: 200 })
   } catch (error) {
