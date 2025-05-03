@@ -13,15 +13,15 @@ A navigation site based on Next.js
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Generate the Prisma client:
    ```bash
-   npx prisma generate
+   pnpm prisma generate
    ```
 4. Run the development server:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -30,11 +30,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 1. Build the project:
    ```bash
-   npm run build
+   pnpm run build
    ```
 2. Start the production server:
    ```bash
-   npm start
+   pnpm start
    ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
