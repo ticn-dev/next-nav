@@ -1,8 +1,9 @@
 import { CategoriesManagerTable } from '@/components/admin/categories-manager-table'
+import { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: '分类设置',
 }
 

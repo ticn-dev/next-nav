@@ -8,6 +8,8 @@ import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 import { CategoryWithSites } from '@/types/category'
 import { MainComponent } from '@/components/next-nav/main-component'
 
+export const dynamic = 'force-dynamic'
+
 // This function enables ISR
 export const revalidate = 3600 // revalidate every hour
 

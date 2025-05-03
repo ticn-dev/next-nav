@@ -1,37 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import crypto from 'crypto'
+import { USER_STATE_COOKIE_NAME, withUserStateResponse } from '@/lib/user-state-cookie'
+
+function _extraHashFromCookie(ustate: string) {
+  const [username, hashedPassword] = ustate.split(':', 2)
+  return { username, hashedPassword }
+}
 
 export async function middleware(request: NextRequest) {
   // 确定哪些路径需要保护
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/api/admin')
+  const isAdminPath = request.nextUrl.pathname.startsWith('/api/admin')
+
+  // exclude
+  const isLoginPath = request.nextUrl.pathname.startsWith('/api/admin/system/login') && request.method === 'POST'
+  const isGetSettingPath = request.nextUrl.pathname.startsWith('/api/admin/system') && request.method === 'GET'
+  const isLogoutPath = request.nextUrl.pathname.startsWith('/api/admin/system/logout') && request.method === 'POST'
+
+  // dont add cookie
+  const isUpdateLoginPath = request.nextUrl.pathname.startsWith('/api/admin/system/login') && request.method === 'PUT'
 
   // 如果不需要保护，直接放行
-  if (!isAdminPath) {
+  if (!isAdminPath || isLoginPath || isLogoutPath || isGetSettingPath) {
     return NextResponse.next()
   }
 
-  // 检查认证头部
-  const authHeader = request.headers.get('authorization')
+  const ustate = request.cookies.get(USER_STATE_COOKIE_NAME)
 
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
+  if (!ustate) {
     // 没有认证信息，返回401并要求认证
-    return NextResponse.json(
-      { error: 'no authorization' },
-      {
-        status: 401,
-        headers: {
-          'WWW-Authenticate': 'Basic realm="Admin Area"',
-        },
-      },
-    )
+    return NextResponse.json({ error: 'no authorization' }, { status: 401 })
   }
 
   // 验证凭据
   try {
-    const encodedCredentials = authHeader.split(' ')[1]
-    const decodedCredentials = Buffer.from(encodedCredentials, 'base64').toString('utf-8')
-    const [username, password] = decodedCredentials.split(':')
+    let vk: { username: string; hashedPassword: string }
+
+    try {
+      vk = _extraHashFromCookie(ustate.value)
+    } catch (error) {
+      console.warn(`process cookie[${ustate.value}]`, error)
+      vk = { username: '', hashedPassword: '' }
+    }
 
     const adminAccount = await prisma.admin.findFirst()
     if (adminAccount === null) {
@@ -41,23 +50,19 @@ export async function middleware(request: NextRequest) {
     const validUsername = adminAccount.username
     const validPassword = adminAccount.password
 
-    const hashedPassword = crypto.createHash('sha512').update(password).digest('hex')
-
-    if (username !== validUsername || hashedPassword.toLowerCase() !== validPassword.toLowerCase()) {
+    if (!vk.username || !vk.hashedPassword || vk.username !== validUsername || vk.hashedPassword.toLowerCase() !== validPassword.toLowerCase()) {
       // 凭据无效，返回401
-      return NextResponse.json(
-        { error: '账号或密码错误' },
-        {
-          status: 401,
-          headers: {
-            'WWW-Authenticate': 'Basic realm="Admin Area"',
-          },
-        },
-      )
+      const resp = NextResponse.json({ error: '账号或密码错误' }, { status: 401 })
+      resp.cookies.delete(USER_STATE_COOKIE_NAME)
+      return resp
     }
 
     // 认证成功，继续请求
-    return NextResponse.next()
+    const resp = NextResponse.next()
+    if (!isUpdateLoginPath) {
+      return withUserStateResponse(resp, vk.username, vk.hashedPassword)
+    }
+    return resp
   } catch (error) {
     console.error('Error during authentication:', error)
     // 处理错误
@@ -67,5 +72,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   runtime: 'nodejs',
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/api/admin/:path*'],
 }

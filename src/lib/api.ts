@@ -157,21 +157,6 @@ export async function uploadSiteFavicon(file: File) {
   }
 }
 
-export async function updateLoginAccount(username: string, password: string) {
-  const response = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-  })
-  if (response.ok) {
-    return true
-  } else {
-    throw new Error(`Failed to update login account: ${response.statusText}`)
-  }
-}
-
 export async function getSiteSettings() {
   const response = await fetch('/api/admin/system')
   if (response.ok) {
@@ -276,5 +261,72 @@ export async function importBookmarks(bookmarks: Bookmarks) {
     return true
   } else {
     throw new Error(`Failed to import bookmarks: ${response.statusText}`)
+  }
+}
+
+export async function getLoginAccount() {
+  const response = await fetch('/api/admin/system/login')
+  if (response.ok) {
+    const data = await response.json()
+    return data as { username: string }
+  } else {
+    throw new Error(`Failed to fetch admin username: ${response.statusText}`)
+  }
+}
+
+export async function login(username: string, password: string) {
+  const response = await fetch('/api/admin/system/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
+  })
+  if (response.ok) {
+    return true
+  } else if (response.status === 401) {
+    const body = (await response.json()) as { error: string }
+    return body.error
+  } else {
+    throw new Error(`Failed to login: ${response.statusText}`)
+  }
+}
+
+export async function testLoginValid() {
+  const response = await fetch('/api/admin/system/login', {
+    method: 'HEAD',
+  })
+  if (response.ok) {
+    return true
+  } else if (response.status === 401) {
+    return false
+  } else {
+    throw new Error(`Failed to test login validity: ${response.statusText}`)
+  }
+}
+
+export async function logout() {
+  const response = await fetch('/api/admin/system/logout', {
+    method: 'POST',
+  })
+  if (response.ok) {
+    return true
+  } else {
+    throw new Error(`Failed to logout: ${response.statusText}`)
+  }
+}
+
+export async function updateLoginAccount(username: string, password: string) {
+  const response = await fetch('/api/admin/system/login', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
+  })
+  if (response.ok) {
+    return true
+  } else {
+    throw new Error(`Failed to update login account: ${response.statusText}`)
   }
 }

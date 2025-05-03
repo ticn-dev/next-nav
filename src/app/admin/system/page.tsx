@@ -1,10 +1,9 @@
 import { SystemSettings } from '@/components/admin/system-settings'
-import { prisma } from '@/lib/prisma'
-import { getSystemSettings } from '@/lib/settings'
+import { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: '系统设置',
 }
 

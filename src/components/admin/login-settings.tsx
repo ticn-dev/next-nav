@@ -6,21 +6,23 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { Eye, EyeOff } from 'lucide-react'
-import { useState } from 'react'
-import { updateLoginAccount } from '@/lib/api'
+import { useEffect, useState } from 'react'
+import { getLoginAccount, updateLoginAccount } from '@/lib/api'
 
-interface LoginSettingsProps {
-  initialUsername: string
-}
-
-export function LoginSettings({ initialUsername }: LoginSettingsProps) {
-  const [username, setUsername] = useState(initialUsername)
+export function LoginSettings() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    getLoginAccount().then((account) => {
+      setUsername(account.username)
+    })
+  }, [])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}

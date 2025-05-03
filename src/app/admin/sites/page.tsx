@@ -1,8 +1,9 @@
 import { SitesManagerTable } from '@/components/admin/sites-manager-table'
+import { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: '站点设置',
 }
 
