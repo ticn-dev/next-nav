@@ -70,9 +70,6 @@ export async function newSite(option: Partial<Omit<Site, 'id'>>, imageFile?: Fil
   }
   const newSiteResponse = await fetch('/api/admin/sites', {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: formData,
   })
   if (newSiteResponse.ok) {
@@ -175,7 +172,7 @@ export async function updateSiteSettings(settings: Partial<SystemSettings>) {
   }))
 
   const response = await fetch('/api/admin/system', {
-    method: 'POST',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },

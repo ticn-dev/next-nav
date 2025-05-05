@@ -23,7 +23,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request) {
   try {
     const formData = await request.formData()
     let parsedRequest: Omit<Site, 'id'>

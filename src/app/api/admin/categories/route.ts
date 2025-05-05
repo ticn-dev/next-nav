@@ -23,7 +23,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
     const body = (await request.json()) as { ids: number[]; value: Omit<Category, 'id'> }
     const { ids, value } = body
@@ -69,7 +69,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request) {
   try {
     const { displayName, order } = (await request.json()) as Omit<Category, 'id'>
 
