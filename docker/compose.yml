@@ -1,0 +1,13 @@
+services:
+  app:
+    image: kairlec/next-nav
+    container_name: next-nav
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 5s
+        window: 60s
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
