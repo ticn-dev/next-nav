@@ -81,6 +81,7 @@ export function SitesManagerTable() {
         <TableCell>
           <div className="flex items-center gap-2">
             <FaviconImage alt={site.displayName} src={site.imageUrl || `/api/icon/${site.id}`} width={20} height={20} className="h-5 w-5 rounded-sm object-contain" loading="lazy" />
+            <span className="line-clamp-1">{site.displayName}</span>
           </div>
         </TableCell>
         <TableCell className="hidden md:table-cell">{site.category.displayName}</TableCell>
