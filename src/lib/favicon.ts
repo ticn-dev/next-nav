@@ -2,6 +2,12 @@ export async function fetchIcon(url: string): Promise<{ iconUrl: string; content
   try {
     // Extract domain from URL
     const urlObj = new URL(url)
+
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      console.warn('no http or https protocol:', urlObj.protocol)
+      return undefined
+    }
+
     const domain = urlObj.hostname
 
     // Try to fetch favicon from common locations
