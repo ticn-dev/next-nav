@@ -98,7 +98,7 @@ export function AdminManagerTable<T extends AdminManagerItem>({
       if (Array.isArray(itemsOrMapper)) {
         setItems(itemsOrMapper)
       } else {
-        setItems(itemsOrMapper(items))
+        setItems((prev) => itemsOrMapper(prev))
       }
     },
   })
@@ -121,6 +121,15 @@ export function AdminManagerTable<T extends AdminManagerItem>({
         ref(refInstance.current)
       } else {
         ref.current = refInstance.current
+      }
+    }
+    return () => {
+      if (ref) {
+        if (typeof ref === 'function') {
+          ref(null)
+        } else {
+          ref.current = null
+        }
       }
     }
   }, [ref])
