@@ -12,7 +12,7 @@ import { Category } from '@/types/category'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/use-toast'
 import { SiteDialog } from '@/components/admin/site-dialog'
-import { deleteSites, getCategories, getSites, updateSites } from '@/lib/api'
+import { deleteSites, getCategories, getSites, updateSitesCategory } from '@/lib/api'
 
 type SiteTermSearcherProvider = SearchTermMatchProvider<SiteWithCategory>
 
@@ -131,15 +131,19 @@ export function SitesManagerTable() {
   const confirmBatchMove = async () => {
     const selectedSites = managerRef.current?.getBatchSelected()
     if (!selectedSites) {
+      console.warn('no site selected', selectedSites)
       return
     }
-    if (selectedSites.size === 0 || !targetCategoryId) return
+    if (selectedSites.size === 0 || !targetCategoryId) {
+      console.warn('no site or targetCategory selected', selectedSites, targetCategoryId)
+      return
+    }
 
     managerRef.current?.setIsBatchProcessing(true)
     try {
       const selectedArray = Array.from(selectedSites)
       const categoryId = Number.parseInt(targetCategoryId)
-      await updateSites(selectedArray, { categoryId })
+      await updateSitesCategory(selectedArray, categoryId)
 
       // Update sites list
       const targetCategory = categories.find((c) => c.id === categoryId)

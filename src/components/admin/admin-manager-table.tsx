@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from '@/components/ui/use-toast'
 import { Edit, Plus, RefreshCw, Trash, X } from 'lucide-react'
-import React, { Ref, useEffect, useRef, useState } from 'react'
+import React, { Ref, useEffect, useState } from 'react'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import { cn } from '@/lib/utils'
 
@@ -84,7 +84,7 @@ export function AdminManagerTable<T extends AdminManagerItem>({
   const [isAllSelected, setIsAllSelected] = useState(false)
   const [isBatchProcessing, setIsBatchProcessing] = useState(false)
 
-  const refInstance = useRef<AdminManagerTableRefs<T>>({
+  const [refInstance, setRefInstance] = useState<AdminManagerTableRefs<T>>({
     getBatchSelected(): Set<number> {
       return selectedItems
     },
@@ -104,6 +104,27 @@ export function AdminManagerTable<T extends AdminManagerItem>({
   })
 
   useEffect(() => {
+    setRefInstance({
+      getBatchSelected(): Set<number> {
+        return selectedItems
+      },
+      resetBatch() {
+        resetBatch()
+      },
+      setIsBatchProcessing(value: boolean) {
+        setIsBatchProcessing(value)
+      },
+      setItems(itemsOrMapper) {
+        if (Array.isArray(itemsOrMapper)) {
+          setItems(itemsOrMapper)
+        } else {
+          setItems((prev) => itemsOrMapper(prev))
+        }
+      },
+    })
+  }, [selectedItems, setIsBatchProcessing, setItems])
+
+  useEffect(() => {
     setIsLoading(true)
     onRequestRefresh()
       .then((data) => {
@@ -118,9 +139,9 @@ export function AdminManagerTable<T extends AdminManagerItem>({
   useEffect(() => {
     if (ref) {
       if (typeof ref === 'function') {
-        ref(refInstance.current)
+        ref(refInstance)
       } else {
-        ref.current = refInstance.current
+        ref.current = refInstance
       }
     }
     return () => {
@@ -132,7 +153,7 @@ export function AdminManagerTable<T extends AdminManagerItem>({
         }
       }
     }
-  }, [ref])
+  }, [ref, refInstance])
 
   useEffect(() => {
     if (selectedChanged === null) {

@@ -62,7 +62,7 @@ export async function deleteCategories(idOrIdArray: number | number[]): Promise<
   }
 }
 
-export async function newSite(option: Partial<Omit<Site, 'id'>>, imageFile?: File) {
+export async function newSite(option: Omit<Site, 'id'>, imageFile?: File) {
   const formData = new FormData()
   formData.append('request', JSON.stringify(option))
   if (option.imageMode === 'upload' && imageFile) {
@@ -80,7 +80,7 @@ export async function newSite(option: Partial<Omit<Site, 'id'>>, imageFile?: Fil
   }
 }
 
-export async function newCategory(option: Partial<Omit<Category, 'id'>>) {
+export async function newCategory(option: Omit<Category, 'id'>) {
   const newCategoryResponse = await fetch('/api/admin/categories', {
     method: 'PUT',
     headers: {
@@ -96,19 +96,21 @@ export async function newCategory(option: Partial<Omit<Category, 'id'>>) {
   }
 }
 
-export async function updateSites(id: number, updateFields: Partial<Omit<Site, 'id'>>): Promise<Site[]>
-export async function updateSites(ids: number[], updateFields: Partial<Omit<Site, 'id'>>): Promise<Site[]>
-export async function updateSites(idOrIdArray: number | number[], updateFields: Partial<Omit<Site, 'id'>>): Promise<Site[]>
-export async function updateSites(idOrIdArray: number | number[], updateFields: Partial<Omit<Site, 'id'>>): Promise<Site[]> {
+export async function updateSites(id: number, option: Omit<Site, 'id'>, imageFile?: File): Promise<Site[]>
+export async function updateSites(ids: number[], option: Omit<Site, 'id'>, imageFile?: File): Promise<Site[]>
+export async function updateSites(idOrIdArray: number | number[], option: Omit<Site, 'id'>, imageFile?: File): Promise<Site[]>
+export async function updateSites(idOrIdArray: number | number[], option: Omit<Site, 'id'>, imageFile?: File): Promise<Site[]> {
   const ids = Array.isArray(idOrIdArray) ? idOrIdArray : [idOrIdArray]
   if (ids.length === 0) return []
-  const response = await fetch(`/api/sites`, {
+  const formData = new FormData()
+  formData.append('request', JSON.stringify(option))
+  formData.append('ids', JSON.stringify(ids))
+  if (option.imageMode === 'upload' && imageFile) {
+    formData.append('imageData', imageFile)
+  }
+  const response = await fetch(`/api/admin/sites`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ids: ids,
-      value: { updateFields },
-    }),
+    body: formData,
   })
   if (!response.ok) {
     throw new Error(`Failed to update sites: ${response.statusText}`)
@@ -117,18 +119,40 @@ export async function updateSites(idOrIdArray: number | number[], updateFields: 
   return updatedSites as Site[]
 }
 
-export async function updateCategories(id: number, updateFields: Partial<Omit<Category, 'id'>>): Promise<Category[]>
-export async function updateCategories(ids: number[], updateFields: Partial<Omit<Category, 'id'>>): Promise<Category[]>
-export async function updateCategories(idOrIdArray: number | number[], updateFields: Partial<Omit<Category, 'id'>>): Promise<Category[]>
-export async function updateCategories(idOrIdArray: number | number[], updateFields: Partial<Omit<Category, 'id'>>): Promise<Category[]> {
+export async function updateSitesCategory(id: number, categoryId: number): Promise<Site[]>
+export async function updateSitesCategory(ids: number[], categoryId: number): Promise<Site[]>
+export async function updateSitesCategory(idOrIdArray: number | number[], categoryId: number): Promise<Site[]>
+export async function updateSitesCategory(idOrIdArray: number | number[], categoryId: number): Promise<Site[]> {
   const ids = Array.isArray(idOrIdArray) ? idOrIdArray : [idOrIdArray]
   if (ids.length === 0) return []
-  const response = await fetch(`/api/categories`, {
+  const response = await fetch(`/api/admin/sites/category`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      ids,
+      value: {
+        categoryId,
+      },
+    }),
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to update sites category: ${response.statusText}`)
+  }
+  const updatedSites = await response.json()
+  return updatedSites as Site[]
+}
+
+export async function updateCategories(id: number, option: Omit<Category, 'id'>): Promise<Category[]>
+export async function updateCategories(ids: number[], option: Omit<Category, 'id'>): Promise<Category[]>
+export async function updateCategories(idOrIdArray: number | number[], option: Omit<Category, 'id'>): Promise<Category[]>
+export async function updateCategories(idOrIdArray: number | number[], option: Omit<Category, 'id'>): Promise<Category[]> {
+  const ids = Array.isArray(idOrIdArray) ? idOrIdArray : [idOrIdArray]
+  if (ids.length === 0) return []
+  const response = await fetch(`/api/admin/categories`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ids: ids,
-      value: { updateFields },
+      value: option,
     }),
   })
   if (!response.ok) {

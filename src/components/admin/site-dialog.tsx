@@ -229,7 +229,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
     try {
       let categoryIdStr = categoryId
       if (useNewCategory) {
-        const category = await newCategory({ displayName: newCategoryName })
+        const category = await newCategory({ displayName: newCategoryName, order: 0 })
 
         categoryIdStr = category.id.toString()
         onCategoryCreate(category)
@@ -251,7 +251,7 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
 
       let savedSite: Site
       if (site) {
-        savedSite = (await updateSites(site.id, requestBody))[0]
+        savedSite = (await updateSites(site.id, requestBody, selectedFile ?? undefined))[0]
       } else {
         savedSite = await newSite(requestBody, selectedFile ?? undefined)
       }
