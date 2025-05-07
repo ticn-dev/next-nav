@@ -4,6 +4,7 @@ export type SystemSettings = {
   title: string
   copyright: string
   showGithubButton: boolean
+  aesKey: string
 }
 
 type SystemSettingsKey = keyof SystemSettings
@@ -29,10 +30,11 @@ export async function getSystemSettings(...columns: string[]): Promise<Partial<S
     title: settings.title || '',
     copyright: settings.copyright || '',
     showGithubButton: settings.showGithubButton !== 'false',
+    aesKey: settings.aesKey || '',
   }
 }
 
-export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T], ctx: { systemSettings: (typeof prisma)['systemSettings'] }) {
+export async function updateSystemSetting<T extends SystemSettingsKey>(key: T, value: SystemSettings[T], ctx: { systemSettings: (typeof prisma)['systemSettings'] } = prisma) {
   await ctx.systemSettings.upsert({
     where: { key },
     update: { value: value.toString() },

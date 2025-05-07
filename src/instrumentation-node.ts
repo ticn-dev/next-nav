@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
+import { generateKey } from '@/lib/aes/node'
+import { getSystemSettings, updateSystemSetting } from '@/lib/settings'
 
 const admins = await prisma.admin.findFirst()
 if (admins === null) {
@@ -29,4 +31,11 @@ if (defaultCategory === null) {
       order: 0,
     },
   })
+}
+
+const { aesKey } = await getSystemSettings('aesKey')
+
+if (!aesKey) {
+  console.log('No aesKey found, creating one...')
+  await updateSystemSetting('aesKey', generateKey())
 }

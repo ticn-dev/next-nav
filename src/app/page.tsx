@@ -7,6 +7,7 @@ import { readData } from '@/lib/uploads'
 import { resolveIconPath, SystemIconId } from '@/lib/path-resolver'
 import { CategoryWithSites } from '@/types/category'
 import { MainComponent } from '@/components/next-nav/main-component'
+import { encrypt } from '@/lib/aes/node'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export const revalidate = 3600 // revalidate every hour
 const getCachedCategories = unstable_cache(
   async () => {
     console.log('Fetching categories from database for Home page')
-    const categories = await prisma.category.findMany({
+    const allCategories = await prisma.category.findMany({
       include: {
         sites: {
           orderBy: [{ order: 'asc' }, { id: 'asc' }],
@@ -24,8 +25,19 @@ const getCachedCategories = unstable_cache(
       },
       orderBy: [{ order: 'asc' }, { id: 'asc' }],
     })
-    // Filter out empty categories
-    return categories.filter((category) => category.sites.length > 0)
+
+    const hideSites = allCategories.flatMap((category) => category.sites.filter((it) => it.hided))
+
+    const { aesKey } = await getSystemSettings('aesKey')
+
+    const encryptedData = encrypt(JSON.stringify(hideSites), aesKey)
+
+    const categories = allCategories.map((category) => ({
+      ...category,
+      sites: category.sites.filter((it) => !it.hided),
+    }))
+
+    return { categories, encryptedData }
   },
   ['index'],
   { revalidate: 3600, tags: ['index'] },
@@ -58,8 +70,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const categories = await getCachedCategories()
-  const systemSettings = await getSystemSettings('copyright', 'showGithubButton')
+  const { categories, encryptedData } = await getCachedCategories()
 
-  return <MainComponent initialCategories={categories as CategoryWithSites[]} showGithubButton={systemSettings.showGithubButton} copyright={systemSettings.copyright} />
+  const systemSettings = await getSystemSettings('copyright', 'showGithubButton', 'aesKey')
+
+  return <MainComponent initialCategories={categories as CategoryWithSites[]} showGithubButton={systemSettings.showGithubButton} copyright={systemSettings.copyright} encryptedData={encryptedData} />
 }

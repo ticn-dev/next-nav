@@ -10,14 +10,13 @@ import { toast } from '@/components/ui/use-toast'
 import { useEffect, useRef, useState } from 'react'
 import { ImageMode, Site } from '@/types/site'
 import { Category } from '@/types/category'
-import { CircleHelp, ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
+import { ImageDown, Link, Loader2, Upload, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
 import NumberInput from '@/components/next-nav/common/number-input'
 import { useDebouncedCallback } from 'use-debounce'
 import FaviconImage from '@/components/next-nav/common/favicon-image'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { newCategory, newSite, updateSites } from '@/lib/api'
 
 interface SiteDialogProps {
@@ -445,18 +444,6 @@ export function SiteDialog({ open, onOpenChange, site, categories, onCategoryCre
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="hided" className="text-right">
               隐藏
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-muted-foreground">
-                      <CircleHelp className="inline h-4 w-4" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>并不能真正地隐藏</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </Label>
             <div className="col-span-3 space-y-1">
               <Checkbox id="hided" checked={hided} onCheckedChange={(e) => setHided(e as boolean)}></Checkbox>

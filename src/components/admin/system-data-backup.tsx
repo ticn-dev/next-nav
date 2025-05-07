@@ -9,7 +9,7 @@ import { BackupRestoreOptions } from '@/lib/backup-restore'
 import { toast } from '@/components/ui/use-toast'
 import { AdminBookmarksImport, BookmarksImportRef } from '@/components/next-nav/admin/admin-bookmarks-import'
 import { Bookmarks } from '@/lib/bookmarks-parser'
-import { doSystemBackup, doSystemRestore, importBookmarks } from '@/lib/api'
+import { doSystemBackup, doSystemRestore, importBookmarks, updateAesKey } from '@/lib/api'
 
 const SelectBackupRestoreOptions: Record<keyof BackupRestoreOptions, string> = {
   systemSiteSettings: '系统站点设置',
@@ -162,6 +162,20 @@ export function SystemDataBackup() {
     }
   }
 
+  const handleResetAesKey = async () => {
+    try {
+      await updateAesKey()
+      toast({ title: '重置成功', description: '加密密钥已重置' })
+    } catch (err) {
+      console.error('Error during reset aes key:', err)
+      toast({
+        title: '重置失败',
+        description: '请稍后重试',
+        variant: 'destructive',
+      })
+    }
+  }
+
   return (
     <>
       <Card>
@@ -190,7 +204,11 @@ export function SystemDataBackup() {
           </Button>
           <Button variant="outline" className="w-40" onClick={() => bookmarksImportRef?.current?.doSelect()}>
             <Folder className="mr-2 h-4 w-4" />
-            {isImporting ? '书签...' : '导入书签'}
+            {isImporting ? '导入书签中...' : '导入书签'}
+          </Button>
+          <Button variant="outline" className="w-40" onClick={() => handleResetAesKey()}>
+            <Folder className="mr-2 h-4 w-4" />
+            重置加密密钥
           </Button>
         </CardContent>
       </Card>

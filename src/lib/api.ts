@@ -304,6 +304,10 @@ export async function login(username: string, password: string) {
     body: JSON.stringify({ username, password }),
   })
   if (response.ok) {
+    const body = (await response.json()) as { hak: string }
+    if (body.hak) {
+      localStorage.setItem('_hak', body.hak)
+    }
     return true
   } else if (response.status === 401) {
     const body = (await response.json()) as { error: string }
@@ -318,6 +322,10 @@ export async function testLoginValid() {
     method: 'HEAD',
   })
   if (response.ok) {
+    const header = response.headers.get('x-hak')
+    if (header) {
+      localStorage.setItem('_hak', header)
+    }
     return true
   } else if (response.status === 401) {
     return false
@@ -349,5 +357,20 @@ export async function updateLoginAccount(username: string, password: string) {
     return true
   } else {
     throw new Error(`Failed to update login account: ${response.statusText}`)
+  }
+}
+
+export async function updateAesKey() {
+  const response = await fetch('/api/admin/system/encrypt/update-aes-key', {
+    method: 'POST',
+  })
+  if (response.ok) {
+    const body = (await response.json()) as { hak: string }
+    if (body.hak) {
+      localStorage.setItem('_hak', body.hak)
+    }
+    return true
+  } else {
+    throw new Error(`Failed to update AES key: ${response.statusText}`)
   }
 }

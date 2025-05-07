@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { getSiteSettings } from '@/lib/api'
 import { SystemSettingsRecord } from '@/types/settings'
 
-interface AdminSettings extends SystemSettingsRecord {
+interface AdminSettings extends Omit<SystemSettingsRecord, 'aesKey'> {
   iconUrl: string
 }
 

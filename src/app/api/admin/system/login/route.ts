@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { sha512 } from '@/lib/hash'
 import crypto from 'crypto'
 import { withUserStateResponse } from '@/lib/user-state-cookie'
+import { getSystemSettings } from '@/lib/settings'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
@@ -37,7 +38,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '账号或密码错误' }, { status: 401 })
     }
 
-    return withUserStateResponse(NextResponse.json({ success: true }), username, hashedPassword)
+    const { aesKey } = await getSystemSettings('aesKey')
+
+    return withUserStateResponse(NextResponse.json({ success: true, hak: aesKey }), username, hashedPassword)
   } catch (error) {
     console.error('Error logging in:', error)
     return NextResponse.json({ error: 'Failed to log in' }, { status: 500 })
@@ -91,7 +94,8 @@ export async function PUT(request: NextRequest) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function HEAD(request: NextRequest) {
   try {
-    return new NextResponse(null, { status: 204 })
+    const { aesKey } = await getSystemSettings('aesKey')
+    return new NextResponse(null, { status: 204, headers: { 'x-hak': aesKey } })
   } catch (error) {
     console.error('Error fetching admin username:', error)
     return NextResponse.json({ error: 'Failed to fetch admin username' }, { status: 500 })
