@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
     const requestBody = await request.json()
     let kvs: { key: string; value: string }[]
