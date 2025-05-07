@@ -107,7 +107,7 @@ export function CategoryFilterableRenderer({ initialCategories, menuOpen, onMenu
 
         {/* Scrollable content area for site listings */}
         <div className="flex flex-1 justify-center overflow-y-auto">
-          <div className="w-full space-y-8 pb-6 transition-[width] duration-300 2xl:w-5/7">
+          <div className="w-full pb-6 transition-[width] duration-300 2xl:w-5/7">
             {rendererCategories.map((category) => (
               <CategorySection key={category.id} category={category} />
             ))}

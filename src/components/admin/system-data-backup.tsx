@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Archive, ArchiveRestore, Folder } from 'lucide-react'
+import { Archive, ArchiveRestore, Folder, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import React, { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -207,7 +207,7 @@ export function SystemDataBackup() {
             {isImporting ? '导入书签中...' : '导入书签'}
           </Button>
           <Button variant="outline" className="w-40" onClick={() => handleResetAesKey()}>
-            <Folder className="mr-2 h-4 w-4" />
+            <ShieldCheck className="mr-2 h-4 w-4" />
             重置加密密钥
           </Button>
         </CardContent>
