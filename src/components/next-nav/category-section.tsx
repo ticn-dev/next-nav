@@ -41,10 +41,10 @@ export function CategorySection({ category }: CategorySectionProps) {
 
   return (
     <section id={`category-${category.id}`} className="category-section">
-      <div ref={headerRef} className="bg-background sticky top-0 z-10 mt-8 mb-2 px-4 py-2">
+      <div ref={headerRef} className="bg-background sticky top-0 z-10 mt-4 mb-1 px-4 py-2">
         <h2 className="text-2xl font-bold">{category.displayName}</h2>
       </div>
-      <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
         {category.sites.map((site) => (
           <SiteCard key={site.id} site={site} />
         ))}

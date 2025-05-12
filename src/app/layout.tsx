@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SettingsProvider>
             <Suspense>
               <SearchProvider>
-                <div className="flex max-h-full min-h-screen flex-col">{children}</div>
+                <div className="flex h-full flex-col">{children}</div>
                 <Toaster />
               </SearchProvider>
             </Suspense>
