@@ -63,7 +63,7 @@ export function Header({ onMobileMenuSwitchRequest, onSettingOpenRequest, showGi
             </Button>
             {showGithubButton && (
               <Button variant="ghost" size="icon" asChild>
-                <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+                <Link href="https://github.com/ticn-dev/next-nav" target="_blank" rel="noopener noreferrer">
                   <Github className="h-5 w-5" />
                   <span className="sr-only">GitHub</span>
                 </Link>
