@@ -47,8 +47,12 @@ export function CategoryFilterableRenderer({ initialCategories, menuOpen, onMenu
 
   useEffect(() => {
     workerRef.current = new Worker(new URL('../../search-worker.ts', import.meta.url))
-    workerRef.current.onmessage = (event: MessageEvent<number[]>) => {
-      const filteredSiteIds = new Set(event.data)
+    workerRef.current.onmessage = (event: MessageEvent<{ searchQuery: string; result: number[] }>) => {
+      if (event.data.searchQuery != searchQuery) {
+        console.debug('search query changed, expected:', searchQuery, 'got:', event.data.searchQuery, 'ignoring')
+        return
+      }
+      const filteredSiteIds = new Set(event.data.result)
 
       // render the filtered categories
       // Filter sites in each category

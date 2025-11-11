@@ -26,5 +26,8 @@ addEventListener('message', (event: MessageEvent<{ query: string } | { init: Cat
   const { query } = event.data
   const result = searcher.getMatches(new fuzzySearch.Query(query, Infinity, [new fuzzySearch.FuzzySearcher(0.3)]))
   console.debug('Worker search result:', result)
-  postMessage(result.matches.map((item) => item.entity.id))
+  postMessage({
+    searchQuery: query,
+    result: result.matches.map((item) => item.entity.id),
+  })
 })
