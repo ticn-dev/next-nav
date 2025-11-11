@@ -19,7 +19,11 @@ A navigation site based on Next.js
    ```bash
    pnpm prisma generate
    ```
-4. Run the development server:
+4. Migrate the database:
+   ```bash
+   pnpm prisma migrate dev
+   ```
+5. Run the development server:
    ```bash
    pnpm run dev
    ```
@@ -28,11 +32,27 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Build
 
-1. Build the project:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ticn-dev/next-nav.git && cd next-nav
+   ```
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Generate the Prisma client:
+   ```bash
+   pnpm prisma generate
+   ```
+4. Migrate the database:
+   ```bash
+   pnpm prisma migrate deploy
+   ```
+5. Build the project:
    ```bash
    pnpm run build
    ```
-2. Start the production server:
+6. Start the production server:
    ```bash
    pnpm start
    ```
