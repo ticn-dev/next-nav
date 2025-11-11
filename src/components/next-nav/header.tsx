@@ -33,7 +33,7 @@ export function Header({ onMobileMenuSwitchRequest, onSettingOpenRequest, showGi
   return (
     <>
       <header className="bg-background sticky top-0 z-40 w-full border-b">
-        <div className="container flex h-16 items-center justify-between px-4">
+        <div className="flex h-16 w-full items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="md:hidden" onClick={onMobileMenuSwitchRequest}>
               <Menu className="h-5 w-5" />
