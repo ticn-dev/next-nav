@@ -43,7 +43,7 @@ export async function PUT(request: Request) {
     }
 
     let useImageUrl: string | null = null
-    let imageData: File
+    let imageData: File | null = null
 
     if (parsedRequest.imageMode === 'url') {
       useImageUrl = parsedRequest.imageUrl
@@ -58,10 +58,12 @@ export async function PUT(request: Request) {
       }
     } else if (parsedRequest.imageMode === 'upload') {
       const imagePart = formData.get('imageData')
-      if (!(imagePart instanceof File)) {
-        return NextResponse.json({ error: 'Invalid image data' }, { status: 400 })
+      if (imagePart !== null) {
+        if (!(imagePart instanceof File)) {
+          return NextResponse.json({ error: 'Invalid image data' }, { status: 400 })
+        }
+        imageData = imagePart
       }
-      imageData = imagePart
     } else if (parsedRequest.imageMode === 'auto-fetch') {
       // Do nothing, auto-fetch will be handled later
     } else {
@@ -86,22 +88,24 @@ export async function PUT(request: Request) {
     })
 
     if (parsedRequest.imageMode === 'upload') {
-      submitBgTask(async () => {
-        try {
-          const data = await imageData.bytes()
-          const contentType = imageData.type
-          const filename = imageData.name
+      if (imageData) {
+        submitBgTask(async () => {
+          try {
+            const data = await imageData.bytes()
+            const contentType = imageData.type
+            const filename = imageData.name
 
-          const ext = filename?.split('.').pop() as string | undefined
+            const ext = filename?.split('.').pop() as string | undefined
 
-          const iconPath = resolveIconPath(site.id)
+            const iconPath = resolveIconPath(site.id)
 
-          await saveData(iconPath, data, { 'content-type': contentType, 'file-ext': ext })
-        } catch (error) {
-          console.error('Error saving image data:', error)
-          // Continue without image
-        }
-      })
+            await saveData(iconPath, data, { 'content-type': contentType, 'file-ext': ext })
+          } catch (error) {
+            console.error('Error saving image data:', error)
+            // Continue without image
+          }
+        })
+      }
     } else if (parsedRequest.imageMode === 'auto-fetch') {
       submitBgTask(async () => {
         try {
@@ -157,7 +161,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     let useImageUrl: string | null = null
-    let imageData: File
+    let imageData: File | null = null
 
     if (parsedRequest.imageMode === 'url') {
       useImageUrl = parsedRequest.imageUrl
@@ -172,10 +176,12 @@ export async function PATCH(request: NextRequest) {
       }
     } else if (parsedRequest.imageMode === 'upload') {
       const imagePart = formData.get('imageData')
-      if (!(imagePart instanceof File)) {
-        return NextResponse.json({ error: 'Invalid image data' }, { status: 400 })
+      if (imagePart !== null) {
+        if (!(imagePart instanceof File)) {
+          return NextResponse.json({ error: 'Invalid image data' }, { status: 400 })
+        }
+        imageData = imagePart
       }
-      imageData = imagePart
     } else if (parsedRequest.imageMode === 'auto-fetch') {
       // Do nothing, auto-fetch will be handled later
     } else {
@@ -205,24 +211,26 @@ export async function PATCH(request: NextRequest) {
     })
 
     if (parsedRequest.imageMode === 'upload') {
-      submitBgTask(async () => {
-        for (const site of sites) {
-          try {
-            const data = await imageData.bytes()
-            const contentType = imageData.type
-            const filename = imageData.name
+      if (imageData) {
+        submitBgTask(async () => {
+          for (const site of sites) {
+            try {
+              const data = await imageData.bytes()
+              const contentType = imageData.type
+              const filename = imageData.name
 
-            const ext = filename?.split('.').pop() as string | undefined
+              const ext = filename?.split('.').pop() as string | undefined
 
-            const iconPath = resolveIconPath(site.id)
+              const iconPath = resolveIconPath(site.id)
 
-            await saveData(iconPath, data, { 'content-type': contentType, 'file-ext': ext })
-          } catch (error) {
-            console.error('Error saving image data:', error)
-            // Continue without image
+              await saveData(iconPath, data, { 'content-type': contentType, 'file-ext': ext })
+            } catch (error) {
+              console.error('Error saving image data:', error)
+              // Continue without image
+            }
           }
-        }
-      })
+        })
+      }
     } else if (parsedRequest.imageMode === 'auto-fetch') {
       submitBgTask(async () => {
         for (const site of sites) {
