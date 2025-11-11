@@ -25,8 +25,13 @@ export function CategoryFilterableRenderer({ initialCategories, menuOpen, onMenu
   const [visibleCategories, setVisibleCategories] = useState<CategoryWithSites[]>(initialCategories)
   const [rendererCategories, setRendererCategories] = useState<CategoryWithSites[]>([])
   const { rendererSettings } = useSettings()
+  const searchQueryRef = useRef<string>(searchQuery) // 添加 ref
 
   const workerRef = useRef<Worker>(null)
+
+  useEffect(() => {
+    searchQueryRef.current = searchQuery
+  }, [searchQuery])
 
   useEffect(() => {
     setRendererCategories(
@@ -48,8 +53,8 @@ export function CategoryFilterableRenderer({ initialCategories, menuOpen, onMenu
   useEffect(() => {
     workerRef.current = new Worker(new URL('../../search-worker.ts', import.meta.url))
     workerRef.current.onmessage = (event: MessageEvent<{ searchQuery: string; result: number[] }>) => {
-      if (event.data.searchQuery != searchQuery) {
-        console.debug('search query changed, expected:', searchQuery, 'got:', event.data.searchQuery, 'ignoring')
+      if (event.data.searchQuery != searchQueryRef.current) {
+        console.debug('search query changed, expected:', searchQueryRef.current, 'got:', event.data.searchQuery, 'ignoring')
         return
       }
       const filteredSiteIds = new Set(event.data.result)
