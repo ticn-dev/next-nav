@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const zipFile = await saveBackupAsZipFile(backupRestoreOptions)
 
     const fileName = `backup_${new Date().toISOString().replace(/:/g, '-')}.zip`
-    return new NextResponse(zipFile, {
+    return new NextResponse(Buffer.from(zipFile), {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename=${fileName}`,

@@ -159,7 +159,8 @@ export async function loadBackupFromZipFile(file: Uint8Array, loadOptions: Backu
   const entries = await zipReader.getEntries()
 
   const entryMap = new Map<string, Uint8Array>()
-  for (const entry of entries) {
+  for (const _entry of entries) {
+    const entry = _entry as zip.FileEntry
     if (!entry.getData) {
       continue
     }

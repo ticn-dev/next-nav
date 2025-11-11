@@ -11,7 +11,7 @@ async function _responseIconData(id: string | number) {
   }
   const contentType = iconData.metadata['content-type'] as string
   const fileExt = iconData.metadata['file-ext'] as string
-  return new NextResponse(iconData.data, {
+  return new NextResponse(Buffer.from(iconData.data), {
     headers: {
       'Content-Type': contentType,
       'Cache-Control': 'public, max-age=31536000, immutable',
