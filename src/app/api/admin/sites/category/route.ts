@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest) {
       },
     })
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json(sites)
   } catch (error) {

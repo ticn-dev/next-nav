@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Unsupported type')
     }
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json({ message: 'Backup restored successfully' }, { status: 200 })
   } catch (error) {

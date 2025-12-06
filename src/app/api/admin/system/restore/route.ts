@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const restorableOperator = await loadBackupFromZipFile(zipData, backupRestoreOptions)
     await applyRestorableOperator(restorableOperator, backupRestoreOptions)
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json({ message: 'Backup restored successfully' }, { status: 200 })
   } catch (error) {

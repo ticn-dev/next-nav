@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return newMetadata
     })
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json(result)
   } catch (error) {

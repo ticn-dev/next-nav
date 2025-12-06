@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       await deleteData(iconPath)
-      revalidateTag('index')
+      revalidateTag('index', 'max')
       return NextResponse.json({ faviconUrl: null })
     }
 

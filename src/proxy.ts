@@ -7,7 +7,7 @@ function _extraHashFromCookie(ustate: string) {
   return { username, hashedPassword }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // 确定哪些路径需要保护
   const isAdminPath = request.nextUrl.pathname.startsWith('/api/admin')
 
@@ -71,6 +71,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  runtime: 'nodejs',
-  matcher: ['/api/admin/:path*'],
+  matcher: ['/api/admin/:path*']
 }

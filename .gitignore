@@ -42,3 +42,4 @@ next-env.d.ts
 
 /data/
 /docker/data/
+src/lib/prisma/generated

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const key = generateKey()
     await updateSystemSetting('aesKey', key)
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json({ success: true, hak: key })
   } catch (error) {

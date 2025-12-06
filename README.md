@@ -1,5 +1,8 @@
 A navigation site based on Next.js
 
+> [!IMPORTANT]
+> Due to `CVE-2025-66478`, recommend updating next-nav to v1.1.0 or later.
+
 ## Feature
 
 - Index Page ISR

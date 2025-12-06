@@ -37,7 +37,7 @@ export async function PATCH(request: NextRequest) {
       data: value,
     })
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json(category)
   } catch (error) {
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest) {
       where: { id: { in: ids } },
     })
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -84,7 +84,7 @@ export async function PUT(request: Request) {
       },
     })
 
-    revalidateTag('index')
+    revalidateTag('index', 'max')
 
     return NextResponse.json(category)
   } catch (error) {
